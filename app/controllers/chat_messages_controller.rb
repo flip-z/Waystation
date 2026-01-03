@@ -1,11 +1,17 @@
 class ChatMessagesController < ApplicationController
+  helper_method :timeframe_label
+
   def index
-    @message = ChatMessage.new
-    @messages = ChatMessage.includes(:user, :chat_reactions, :mentions).order(created_at: :desc).limit(200).reverse
-    @active_statuses = User.where.not(status_message: nil).where("status_expires_at > ?", Time.current)
-    @chat_users = User.where(id: ChatMessage.select(:user_id).distinct).or(User.where(id: current_user.id))
-    @active_campfires = CampfireRoom.active.includes(:created_by).order(created_at: :desc)
+    @tab = params.fetch(:tab, "chat")
+    @timeframe = normalized_timeframe(params[:timeframe])
+
     CampfireRoom.close_stale!
+
+    if dashboard_tab?
+      load_dashboard_stats
+    else
+      load_chat_content
+    end
   end
 
   def create
@@ -24,8 +30,12 @@ class ChatMessagesController < ApplicationController
     if @message.save
       respond_after_submit
     else
+      @tab = "chat"
+      @timeframe = normalized_timeframe(params[:timeframe])
       @messages = ChatMessage.includes(:user, :chat_reactions, :mentions).order(created_at: :desc).limit(200).reverse
-      @active_statuses = User.where.not(status_message: nil).where("status_expires_at > ?", Time.current)
+      @active_statuses = active_beacons
+      @chat_users = User.where(id: ChatMessage.select(:user_id).distinct).or(User.where(id: current_user.id))
+      @active_campfires = CampfireRoom.active.includes(:created_by).order(created_at: :desc)
       respond_to do |format|
         format.html { render :index, status: :unprocessable_entity }
         format.turbo_stream do
@@ -40,6 +50,67 @@ class ChatMessagesController < ApplicationController
   end
 
   private
+
+  def dashboard_tab?
+    @tab == "dashboard"
+  end
+
+  def normalized_timeframe(value)
+    value.presence_in(%w[day week month year all]) || "week"
+  end
+
+  def timeframe_label
+    {
+      "day" => "Last Day",
+      "week" => "Last Week",
+      "month" => "Last Month",
+      "year" => "Last Year",
+      "all" => "All Time"
+    }.fetch(@timeframe, "Last Week")
+  end
+
+  def timeframe_range
+    case @timeframe
+    when "day" then 1.day.ago..Time.current
+    when "week" then 1.week.ago..Time.current
+    when "month" then 1.month.ago..Time.current
+    when "year" then 1.year.ago..Time.current
+    else
+      nil
+    end
+  end
+
+  def load_chat_content
+    @message = ChatMessage.new
+    @messages = ChatMessage.includes(:user, :chat_reactions, :mentions).order(created_at: :desc).limit(200).reverse
+    @active_statuses = active_beacons
+    @chat_users = User.where(id: ChatMessage.select(:user_id).distinct).or(User.where(id: current_user.id))
+    @active_campfires = CampfireRoom.active.includes(:created_by).order(created_at: :desc)
+    CampfireRoom.close_stale!
+  end
+
+  def load_dashboard_stats
+    time_range = timeframe_range
+    @message_counts = grouped_counts(ChatMessage.where(message_type: :regular), :user_id, time_range)
+    @campfire_counts = grouped_counts(CampfireRoom.all, :created_by_id, time_range)
+  end
+
+  def grouped_counts(scope, group_key, time_range)
+    scoped = time_range ? scope.where(created_at: time_range) : scope
+    counts = scoped.group(group_key).order(Arel.sql("COUNT(*) DESC")).limit(10).count
+    users = User.where(id: counts.keys).index_by(&:id)
+
+    counts.map do |id, total|
+      user = users[id]
+      next unless user
+
+      [user, total]
+    end.compact
+  end
+
+  def active_beacons
+    User.where.not(status_message: nil).where("status_expires_at > ?", Time.current)
+  end
 
   def handle_command(body)
     command, rest = body.split(" ", 2)
