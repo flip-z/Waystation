@@ -1,0 +1,28 @@
+<section class="panel">
+  <h1>New invite</h1>
+
+  <% if @invite.errors.any? %>
+    <div class="flash flash-alert">
+      <%= @invite.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <%= form_with model: [:admin, @invite], local: true, class: "form-grid" do |f| %>
+    <div>
+      <%= f.label :email, "Email" %>
+      <%= f.email_field :email, required: true, class: "input" %>
+    </div>
+    <div>
+      <%= f.label :role, "Role" %>
+      <%= f.select :role, Invite.roles.keys, {}, class: "input" %>
+    </div>
+    <div>
+      <%= f.label :expires_at, "Expires at" %>
+      <%= f.datetime_local_field :expires_at, value: 7.days.from_now.strftime("%Y-%m-%dT%H:%M"), class: "input" %>
+    </div>
+    <div class="actions">
+      <%= f.submit "Create invite", class: "button" %>
+      <%= link_to "Back", admin_invites_path, class: "button button-muted" %>
+    </div>
+  <% end %>
+</section>

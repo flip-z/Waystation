@@ -1,0 +1,9 @@
+<div id="<%= dom_id(message) %>" class="chat-message">
+  <div class="chat-line">
+    <span class="chat-time muted">[<%= message.created_at.strftime("%H:%M") %>]</span>
+    <span class="chat-handle chat-user-<%= message.user.id %>">
+      <%= link_to "&lt;#{message.user.handle}&gt;".html_safe, user_path(message.user) %>
+    </span>
+    <span class="chat-text"><%= simple_format(message.body, {}, wrapper_tag: "span") %></span>
+  </div>
+</div>

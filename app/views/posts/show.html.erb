@@ -1,0 +1,32 @@
+<section class="panel">
+  <div class="panel-header">
+    <h1><%= @post.title %></h1>
+    <div class="meta">
+      <span><%= @post.published_at&.strftime("%Y-%m-%d") || "Unpublished" %></span>
+      <span><%= @post.view_count %> views</span>
+    </div>
+  </div>
+
+  <% if @post.tags.any? %>
+    <div class="tags">
+      <% @post.tags.each do |tag| %>
+        <span class="tag"><%= tag.name %></span>
+      <% end %>
+    </div>
+  <% end %>
+
+  <article class="markdown">
+    <%= render_markdown(@body).html_safe %>
+  </article>
+
+  <% if @history.any? %>
+    <div class="panel subpanel">
+      <h2>History</h2>
+      <%= form_with url: post_path(@post), method: :get, local: true, class: "form-inline" do %>
+        <%= label_tag :version, "View version" %>
+        <%= select_tag :version, options_for_select(@history.map { |entry| ["#{entry[:date]} — #{entry[:subject]}", entry[:sha]] }, @version), include_blank: "Current", class: "input" %>
+        <%= submit_tag "Load", class: "button button-muted" %>
+      <% end %>
+    </div>
+  <% end %>
+</section>

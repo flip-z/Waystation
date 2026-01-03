@@ -1,0 +1,5 @@
+<style id="chat_user_colors">
+<% users.each do |user| %>
+.chat-user-<%= user.id %> { color: var(--chat-<%= user.chat_color %>); }
+<% end %>
+</style>

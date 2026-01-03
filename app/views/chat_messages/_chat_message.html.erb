@@ -1,0 +1,43 @@
+<div
+  id="<%= dom_id(chat_message) %>"
+  class="chat-message <%= "mention" if chat_message.mentions.any? { |mention| mention.user_id == current_user.id } %>"
+  data-message-user-id="<%= chat_message.user_id %>"
+>
+  <div class="chat-line">
+    <span class="chat-time muted">[<%= chat_message.created_at.strftime("%H:%M") %>]</span>
+    <span class="chat-handle chat-user-<%= chat_message.user.id %>">
+      <%= link_to "&lt;#{chat_message.user.handle}&gt;".html_safe, user_path(chat_message.user) %>
+    </span>
+    <% room = chat_message.campfire? ? CampfireRoom.find_by(id: chat_message.metadata["room_id"]) : nil %>
+    <% if chat_message.campfire? && room %>
+      <% prefix = "Campfire #{room.name}" %>
+      <% body = chat_message.body.to_s %>
+      <% if body.start_with?(prefix) %>
+        <% suffix = body.delete_prefix(prefix).strip %>
+        <span class="chat-text">
+          <span>Campfire</span>
+          <%= link_to room.name, campfire_path(room), class: "campfire-name-link" %>
+          <span><%= suffix %></span>
+        </span>
+      <% else %>
+        <span class="chat-text"><%= simple_format(body, {}, wrapper_tag: "span") %></span>
+      <% end %>
+    <% else %>
+      <span class="chat-text"><%= simple_format(chat_message.body, {}, wrapper_tag: "span") %></span>
+    <% end %>
+    <% if chat_message.beacon? %>
+      <span class="badge">beacon</span>
+    <% elsif chat_message.campfire? %>
+      <% if room&.active? %>
+        <%= link_to "campfire", campfire_path(room), class: "badge badge-link" %>
+      <% elsif room %>
+        <%= link_to "campfire", campfire_path(room), class: "badge badge-link badge-closed" %>
+      <% else %>
+        <span class="badge badge-closed">campfire</span>
+      <% end %>
+    <% elsif chat_message.system? %>
+      <span class="badge">system</span>
+    <% end %>
+  </div>
+
+</div>

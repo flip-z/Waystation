@@ -1,0 +1,35 @@
+<% if @post.errors.any? %>
+  <div class="flash flash-alert">
+    <%= @post.errors.full_messages.to_sentence %>
+  </div>
+<% end %>
+
+<%= form_with model: [:admin, @post], local: true, class: "form-grid" do |f| %>
+  <div>
+    <%= f.label :title, "Title" %>
+    <%= f.text_field :title, required: true, class: "input" %>
+  </div>
+  <div>
+    <%= f.label :slug, "Slug" %>
+    <%= f.text_field :slug, placeholder: "auto-generated if blank", class: "input" %>
+  </div>
+  <div>
+    <%= f.label :status, "Status" %>
+    <%= f.select :status, Post.statuses.keys, {}, class: "input" %>
+  </div>
+  <div>
+    <%= f.label :published_at, "Publish at" %>
+    <%= f.datetime_local_field :published_at, class: "input" %>
+  </div>
+  <div>
+    <%= label_tag "post_tag_list", "Tags (comma-separated)" %>
+    <%= text_field_tag "post[tag_list]", @post.tags.map(&:name).join(", "), id: "post_tag_list", class: "input" %>
+  </div>
+  <div class="full">
+    <%= f.label :body_markdown, "Markdown" %>
+    <%= f.text_area :body_markdown, rows: 18, class: "input textarea" %>
+  </div>
+  <div class="actions">
+    <%= f.submit class: "button" %>
+  </div>
+<% end %>

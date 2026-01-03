@@ -1,0 +1,16 @@
+<% if message.errors.any? %>
+  <div class="flash flash-alert">
+    <%= message.errors.full_messages.to_sentence %>
+  </div>
+<% end %>
+
+<%= form_with model: message, url: chat_messages_path, class: "form-grid", data: { controller: "chat-form" } do |f| %>
+  <div class="full">
+    <%= f.label :body, "Message" %>
+    <%= f.text_area :body, rows: 1, class: "input auto-grow", maxlength: 300, data: { controller: "autogrow", chat_form_target: "input", action: "input->autogrow#resize keydown->chat-form#keydown" } %>
+  </div>
+  <div class="actions">
+    <%= f.submit "Send", class: "button" %>
+    <span class="muted mono">Commands: /beacon message, /beacon clear, /campfire</span>
+  </div>
+<% end %>

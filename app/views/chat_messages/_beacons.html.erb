@@ -1,0 +1,15 @@
+<div class="beacon-list" id="beacons">
+  <h2>Beacons</h2>
+  <% if active_statuses.any? %>
+    <ul class="status-list">
+      <% active_statuses.each do |user| %>
+        <li class="status-item chat-border-<%= user.chat_color %>">
+          <span class="mono">@<%= user.handle %></span>
+          <span><%= user.status_message %></span>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="muted">No active beacons.</p>
+  <% end %>
+</div>

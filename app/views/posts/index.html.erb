@@ -1,0 +1,26 @@
+<section class="panel">
+  <h1>Blog</h1>
+
+  <% if @posts.any? %>
+    <div class="post-list">
+      <% @posts.each do |post| %>
+        <article class="post-card">
+          <h2><%= link_to post.title, post_path(post) %></h2>
+          <div class="meta">
+            <span><%= post.published_at&.strftime("%Y-%m-%d") || "Unpublished" %></span>
+            <span><%= post.view_count %> views</span>
+          </div>
+          <% if post.tags.any? %>
+            <div class="tags">
+              <% post.tags.each do |tag| %>
+                <span class="tag"><%= tag.name %></span>
+              <% end %>
+            </div>
+          <% end %>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="muted">No posts yet.</p>
+  <% end %>
+</section>

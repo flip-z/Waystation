@@ -1,0 +1,36 @@
+<section class="panel">
+  <div class="panel-header">
+    <h1>Chat</h1>
+  </div>
+
+  <%= turbo_stream_from "chat_messages" %>
+  <%= turbo_stream_from "active_campfires" %>
+  <%= turbo_stream_from "chat_user_colors" %>
+  <%= turbo_stream_from "beacons" %>
+
+  <%= render "chat_messages/user_colors", users: @chat_users %>
+
+  <div class="chat-shell">
+    <div class="chat-pane">
+      <div
+        class="chat-log"
+        id="chat_messages"
+        data-controller="chat-scroll chat-sound"
+        data-chat-scroll-container-value="true"
+        data-chat-sound-current-user-id-value="<%= current_user.id %>"
+        data-chat-sound-url-value="/audio/retro.wav"
+      >
+        <%= render @messages %>
+      </div>
+      <div class="chat-composer" id="chat_message_form">
+        <%= render "chat_messages/form", message: @message %>
+      </div>
+    </div>
+
+    <aside class="chat-sidebar">
+      <%= render "chat_messages/active_campfires", active_campfires: @active_campfires %>
+
+      <%= render "chat_messages/beacons", active_statuses: @active_statuses %>
+    </aside>
+  </div>
+</section>

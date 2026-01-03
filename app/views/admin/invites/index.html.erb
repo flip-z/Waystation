@@ -1,0 +1,31 @@
+<section class="panel">
+  <div class="panel-header">
+    <h1>Invites</h1>
+    <%= link_to "New invite", new_admin_invite_path, class: "button" %>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Expires</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @invites.each do |invite| %>
+        <tr>
+          <td><%= invite.email %></td>
+          <td><%= invite.role %></td>
+          <td><%= invite.used_at? ? "used" : (invite.expires_at.future? ? "active" : "expired") %></td>
+          <td><%= invite.expires_at.strftime("%Y-%m-%d %H:%M") %></td>
+          <td class="mono">
+            <%= new_signup_url(token: invite.token) %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</section>

@@ -1,0 +1,16 @@
+<div id="active_campfires">
+  <% if active_campfires.any? %>
+    <div class="campfire-list">
+      <ul class="status-list">
+        <% active_campfires.each do |room| %>
+          <li class="status-item">
+            <%= link_to room.name, campfire_path(room), class: "mono campfire-name-link" %>
+            <span class="muted">Host: @<%= room.created_by.handle %></span>
+            <%= link_to "Join", campfire_path(room), class: "button button-muted button-tiny" %>
+            <span class="muted">Messages: <%= room.campfire_messages.count %></span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+</div>

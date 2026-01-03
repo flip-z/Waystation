@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  token: invite-one
+  email: invite-one@example.com
+  expires_at: 2026-01-02 14:20:12
+  used_at: 2026-01-02 14:20:12
+  role: 1
+  invited_by: one
+
+two:
+  token: invite-two
+  email: invite-two@example.com
+  expires_at: 2026-01-02 14:20:12
+  used_at: 2026-01-02 14:20:12
+  role: 1
+  invited_by: two

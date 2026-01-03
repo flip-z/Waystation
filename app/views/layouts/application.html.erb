@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Waystation" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Waystation">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%= action_cable_meta_tag %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+    <div class="frame">
+      <header class="site-header">
+        <div class="brand">
+          <span class="brand-icon">[*]</span>
+          <span class="brand-title">Waystation</span>
+        </div>
+        <% if current_user %>
+          <nav
+            class="primary-nav"
+            data-controller="notifications"
+            data-notifications-on-chat-value="<%= controller_name.in?(%w[chat_messages campfires]) %>"
+            data-notifications-current-user-id-value="<%= current_user.id %>"
+          >
+            <%= link_to posts_path do %>
+              <%= image_tag "pixel-star.svg", class: "icon", alt: "" %>
+              Blog
+            <% end %>
+            <%= link_to chat_path, class: "nav-chat" do %>
+              <%= image_tag "pixel-chat.svg", class: "icon", alt: "" %>
+              Chat
+              <span class="nav-badge" data-notifications-target="badge" hidden>*</span>
+            <% end %>
+            <%= link_to files_path do %>
+              <%= image_tag "pixel-files.svg", class: "icon", alt: "" %>
+              Files
+            <% end %>
+            <% if current_user.admin? %>
+              <span class="nav-divider">|</span>
+              <%= link_to "Admin Posts", admin_posts_path %>
+              <%= link_to "Invites", admin_invites_path %>
+            <% end %>
+          </nav>
+        <% end %>
+        <div class="session-info">
+          <% if current_user %>
+            <span class="mono">@<%= current_user.handle %></span>
+            <%= link_to "Settings", edit_profile_path, class: "button button-muted" %>
+            <%= button_to "Sign out", session_path, method: :delete, class: "button button-muted" %>
+          <% end %>
+        </div>
+      </header>
+
+      <main class="site-main">
+        <%= render "shared/flash" %>
+        <%= yield %>
+      </main>
+    </div>
+  </body>
+</html>

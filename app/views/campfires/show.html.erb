@@ -1,0 +1,75 @@
+<%= tag.section class: "panel", data: (@room.active? ? { controller: "campfire", campfire_room_id_value: @room.id, campfire_mic_mode_value: current_user.mic_mode } : {}) do %>
+  <div class="panel-header">
+    <h1><%= @room.name %></h1>
+    <span class="muted mono">Room <%= @room.id %></span>
+  </div>
+
+  <% if @room.active? %>
+    <p class="muted" data-campfire-status>Connecting...</p>
+    <div class="campfire-audio-status">
+      <button
+        class="button button-muted button-tiny"
+        data-action="campfire#enableAudio"
+        data-campfire-target="audioButton"
+        hidden
+      >
+        Enable Audio
+      </button>
+      <button
+        class="button button-muted button-tiny"
+        data-action="campfire#playTestTone"
+      >
+        Test Tone
+      </button>
+      <div class="campfire-peer-list" data-campfire-target="peerList"></div>
+    </div>
+    <div class="campfire-debug" data-campfire-target="debug"></div>
+  <% else %>
+    <p class="muted">Campfire closed. Viewing read-only history.</p>
+  <% end %>
+
+  <div class="campfire-controls">
+    <% if @room.active? %>
+      <% if current_user.push_to_talk? %>
+        <button
+          class="button"
+          data-action="mousedown->campfire#pushToTalkStart mouseup->campfire#pushToTalkEnd mouseleave->campfire#pushToTalkEnd"
+        >
+          Hold to Talk
+        </button>
+      <% else %>
+        <span class="muted">Open mic enabled.</span>
+      <% end %>
+    <% end %>
+    <% if @room.created_by_id == current_user.id && @room.active? %>
+      <%= button_to "Close campfire", close_campfire_path(@room), method: :patch, class: "button button-warn" %>
+    <% end %>
+    <%= link_to "Back to chat", chat_path, class: "button button-muted" %>
+  </div>
+
+  <%= turbo_stream_from "chat_user_colors" %>
+  <%= render "chat_messages/user_colors", users: @chat_users %>
+
+  <div class="campfire-shell">
+    <div class="campfire-pane">
+      <%= turbo_stream_from [@room, :campfire_messages] %>
+
+      <div
+        class="chat-log"
+        id="campfire_messages"
+        data-controller="chat-scroll"
+        data-chat-scroll-container-value="true"
+      >
+        <%= render partial: "campfire_messages/message", collection: @messages, as: :message %>
+      </div>
+
+      <% if @room.active? %>
+        <div class="chat-composer" id="campfire_message_form">
+          <%= render "campfire_messages/form", room: @room, message: @message %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="campfire-audio"></div>
+<% end %>

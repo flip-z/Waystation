@@ -1,0 +1,29 @@
+<section class="panel">
+  <div class="panel-header">
+    <h1>Profile</h1>
+    <% if @user.id == current_user.id %>
+      <%= link_to "Edit settings", edit_profile_path, class: "button button-muted" %>
+    <% end %>
+  </div>
+
+  <div class="profile-grid">
+    <div>
+      <div class="muted">Username</div>
+      <div class="mono chat-user-<%= @user.id %>">@<%= @user.handle %></div>
+    </div>
+    <div>
+      <div class="muted">Mic mode</div>
+      <div><%= @user.mic_mode.tr("_", " ") %></div>
+    </div>
+    <div>
+      <div class="muted">Chat color</div>
+      <div><%= @user.chat_color.tr("_", " ").titleize %></div>
+    </div>
+    <% if @user.active_status? %>
+      <div>
+        <div class="muted">Beacon</div>
+        <div><%= @user.status_message %></div>
+      </div>
+    <% end %>
+  </div>
+</section>

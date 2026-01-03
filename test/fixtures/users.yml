@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  email: one@example.com
+  role: 1
+  handle: one
+  mic_mode: 0
+  magic_link_token:
+  magic_link_sent_at:
+  magic_link_expires_at:
+  last_signed_in_at: 2026-01-02 14:20:08
+
+two:
+  email: two@example.com
+  role: 1
+  handle: two
+  mic_mode: 1
+  magic_link_token:
+  magic_link_sent_at:
+  magic_link_expires_at:
+  last_signed_in_at: 2026-01-02 14:20:08
