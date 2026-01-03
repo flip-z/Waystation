@@ -162,6 +162,31 @@ textarea {
   margin-bottom: 12px;
 }
 
+.chat-subtabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chat-subtab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--silver-400);
+  color: var(--silver-200);
+  background: rgba(20, 0, 22, 0.6);
+  border-radius: 4px;
+  text-decoration: none;
+  border-bottom: none;
+}
+
+.chat-subtab.active {
+  border-color: var(--acid);
+  color: var(--acid);
+  box-shadow: 0 0 8px rgba(156, 255, 77, 0.4);
+}
+
 .subpanel {
   margin-top: 18px;
   border-color: var(--silver-400);
@@ -238,6 +263,10 @@ textarea {
   text-align: left;
 }
 
+.table .numeric {
+  text-align: right;
+}
+
 .table th {
   background: #200528;
   text-transform: uppercase;
@@ -254,6 +283,49 @@ textarea {
   border: 2px solid var(--silver-400);
   padding: 14px;
   background: rgba(18, 0, 24, 0.7);
+}
+
+.chat-dashboard {
+  display: grid;
+  gap: 18px;
+}
+
+.dashboard-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid var(--silver-400);
+  color: var(--silver-200);
+  background: rgba(18, 0, 24, 0.7);
+  border-radius: 999px;
+  text-decoration: none;
+  border-bottom: none;
+}
+
+.filter-pill.active {
+  border-color: var(--acid);
+  color: var(--acid);
+  box-shadow: 0 0 8px rgba(156, 255, 77, 0.4);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
 }
 
 .chat-log {
