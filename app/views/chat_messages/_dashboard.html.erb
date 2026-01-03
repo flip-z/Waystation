@@ -1,0 +1,78 @@
+<div class="chat-dashboard">
+  <div class="dashboard-controls">
+    <div>
+      <p class="muted">Top activity for <%= timeframe_label %>.</p>
+    </div>
+    <div class="filter-pills">
+      <% [["day", "Last Day"], ["week", "Last Week"], ["month", "Last Month"], ["year", "Last Year"], ["all", "All Time"]].each do |key, label| %>
+        <%= link_to label, chat_path(tab: "dashboard", timeframe: key), class: ["filter-pill", (timeframe == key ? "active" : nil)].compact.join(" ") %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <section class="subpanel">
+      <div class="panel-header">
+        <div>
+          <h2>Most Messages</h2>
+          <p class="muted">People sending the most chat messages.</p>
+        </div>
+        <span class="badge">Top 10</span>
+      </div>
+      <% if message_counts.any? %>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>User</th>
+              <th class="numeric">Messages</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% message_counts.each_with_index do |(user, total), index| %>
+              <tr>
+                <td class="numeric"><%= index + 1 %></td>
+                <td><span class="mono">@<%= user.handle %></span></td>
+                <td class="numeric"><%= total %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p class="muted">No messages in this window yet.</p>
+      <% end %>
+    </section>
+
+    <section class="subpanel">
+      <div class="panel-header">
+        <div>
+          <h2>Campfires Lit</h2>
+          <p class="muted">Who is starting the most campfires.</p>
+        </div>
+        <span class="badge">Top 10</span>
+      </div>
+      <% if campfire_counts.any? %>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>User</th>
+              <th class="numeric">Campfires</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% campfire_counts.each_with_index do |(user, total), index| %>
+              <tr>
+                <td class="numeric"><%= index + 1 %></td>
+                <td><span class="mono">@<%= user.handle %></span></td>
+                <td class="numeric"><%= total %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p class="muted">No campfires in this window yet.</p>
+      <% end %>
+    </section>
+  </div>
+</div>
