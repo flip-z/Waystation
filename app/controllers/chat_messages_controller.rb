@@ -2,7 +2,7 @@ class ChatMessagesController < ApplicationController
   helper_method :timeframe_label
 
   def index
-    @tab = params.fetch(:tab, "chat")
+    @tab = normalized_tab(params[:tab])
     @timeframe = normalized_timeframe(params[:timeframe])
 
     CampfireRoom.close_stale!
@@ -51,12 +51,16 @@ class ChatMessagesController < ApplicationController
 
   private
 
-  def dashboard_tab?
-    @tab == "dashboard"
-  end
-
   def normalized_timeframe(value)
     value.presence_in(%w[day week month year all]) || "week"
+  end
+
+  def normalized_tab(value)
+    value.presence_in(%w[chat dashboard]) || "chat"
+  end
+
+  def dashboard_tab?
+    @tab == "dashboard"
   end
 
   def timeframe_label
@@ -86,7 +90,6 @@ class ChatMessagesController < ApplicationController
     @active_statuses = active_beacons
     @chat_users = User.where(id: ChatMessage.select(:user_id).distinct).or(User.where(id: current_user.id))
     @active_campfires = CampfireRoom.active.includes(:created_by).order(created_at: :desc)
-    CampfireRoom.close_stale!
   end
 
   def load_dashboard_stats

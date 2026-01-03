@@ -2,7 +2,7 @@
   <div class="panel-header">
     <h1>Chat</h1>
     <nav class="chat-subtabs">
-      <%= link_to "Live Chat", chat_path(tab: "chat"), class: ["chat-subtab", (@tab == "chat" ? "active" : nil)].compact.join(" ") %>
+      <%= link_to "Live Chat", chat_path(tab: "chat", timeframe: @timeframe), class: ["chat-subtab", (@tab == "chat" ? "active" : nil)].compact.join(" ") %>
       <%= link_to "Dashboard", chat_path(tab: "dashboard", timeframe: @timeframe), class: ["chat-subtab", (@tab == "dashboard" ? "active" : nil)].compact.join(" ") %>
     </nav>
   </div>
