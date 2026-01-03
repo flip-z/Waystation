@@ -35,8 +35,14 @@ class CampfireChannel < ApplicationCable::Channel
     participant.save!
     room.update!(last_empty_at: nil)
 
-    transmit({ type: "participants", peers: room.campfire_participants.pluck(:peer_id) })
-    ActionCable.server.broadcast(stream_name, { type: "join", peer_id: @peer_id })
+    participants = room.campfire_participants.includes(:user).map do |member|
+      { peer_id: member.peer_id, user_id: member.user_id, handle: member.user.handle }
+    end
+    transmit({ type: "participants", participants: participants })
+    ActionCable.server.broadcast(
+      stream_name,
+      { type: "join", participant: { peer_id: @peer_id, user_id: current_user.id, handle: current_user.handle } }
+    )
     Rails.logger.info("[CampfireChannel] Subscribed peer #{@peer_id} to room #{@room_id}")
   end
 
@@ -46,7 +52,10 @@ class CampfireChannel < ApplicationCable::Channel
 
     room.campfire_participants.where(peer_id: @peer_id).delete_all
     room.update!(last_empty_at: Time.current) if room.campfire_participants.count.zero?
-    ActionCable.server.broadcast(stream_name, { type: "leave", peer_id: @peer_id })
+    ActionCable.server.broadcast(
+      stream_name,
+      { type: "leave", participant: { peer_id: @peer_id, user_id: current_user.id, handle: current_user.handle } }
+    )
     Rails.logger.info("[CampfireChannel] Unsubscribed peer #{@peer_id} from room #{@room_id}")
   end
 

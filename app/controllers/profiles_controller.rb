@@ -6,9 +6,15 @@ class ProfilesController < ApplicationController
   def update
     @user = current_user
     if @user.update(profile_params)
-      redirect_to edit_profile_path, notice: "Profile updated."
+      respond_to do |format|
+        format.html { redirect_to edit_profile_path, notice: "Profile updated." }
+        format.json { render json: { mic_mode: @user.mic_mode }, status: :ok }
+      end
     else
-      render :edit, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
 

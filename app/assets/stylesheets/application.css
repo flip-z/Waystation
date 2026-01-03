@@ -215,9 +215,33 @@ textarea {
   cursor: pointer;
 }
 
+.button-tiny {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.button-compact {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
 .button-muted {
   border-color: var(--silver-400);
   color: var(--silver-200);
+}
+
+.button-voice-join {
+  border-color: var(--acid);
+  color: var(--acid);
+  background: rgba(156, 255, 77, 0.12);
+}
+
+.button-voice-leave {
+  border-color: var(--warn);
+  color: var(--warn);
+  background: rgba(255, 92, 92, 0.12);
 }
 
 .button-warn {
@@ -262,6 +286,7 @@ textarea {
   overflow-y: auto;
   padding-right: 6px;
   flex: 1;
+  min-height: 0;
 }
 
 .chat-message {
@@ -464,20 +489,50 @@ textarea {
   margin-top: 12px;
 }
 
+.campfire-voice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.campfire-room-menu summary {
+  list-style: none;
+}
+
+.campfire-room-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.campfire-room-menu-panel {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--silver-400);
+  background: rgba(18, 0, 24, 0.9);
+  display: grid;
+  gap: 6px;
+  min-width: 220px;
+}
+
 .campfire-audio {
   margin-top: 16px;
 }
 
 .campfire-shell {
-  display: block;
+  display: flex;
+  flex-direction: column;
   margin-top: 16px;
+  min-height: 0;
 }
 
 .campfire-pane {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 340px);
+  height: calc(100svh - 340px);
   min-height: 360px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .campfire-meta {
@@ -494,6 +549,35 @@ textarea {
   display: flex;
   justify-content: space-between;
   gap: 10px;
+  align-items: center;
+}
+
+.campfire-presence-title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.campfire-presence-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.campfire-voice-meta {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.select-compact {
+  padding: 4px 8px;
+  border: 1px solid var(--silver-400);
+  background: #120018;
+  color: var(--silver-100);
+  font-size: 0.75rem;
 }
 
 .presence-debug {
@@ -518,6 +602,11 @@ textarea {
   gap: 6px;
 }
 
+.presence-list li {
+  display: flex;
+  align-items: center;
+}
+
 .talk-indicator {
   margin-right: 6px;
   color: var(--silver-400);
@@ -525,6 +614,27 @@ textarea {
 
 .talk-indicator.speaking {
   color: var(--acid);
+}
+
+.voice-indicator {
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border: 1px solid var(--silver-400);
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+}
+
+.voice-indicator::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  right: 2px;
+  height: 1px;
+  background: var(--silver-400);
+  transform: rotate(45deg);
 }
 
 .meta {
@@ -605,13 +715,15 @@ textarea {
   }
 
   .chat-pane {
-    height: auto;
-    min-height: 320px;
+    height: calc(100vh - 260px);
+    height: calc(100svh - 260px);
+    min-height: 240px;
   }
 
   .campfire-pane {
-    height: auto;
-    min-height: 320px;
+    height: calc(100vh - 260px);
+    height: calc(100svh - 260px);
+    min-height: 240px;
   }
 }
 .chat-handle a {

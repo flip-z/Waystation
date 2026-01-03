@@ -34,6 +34,8 @@
   - Create voice room tied to the main channel thread.
   - Add profile setting for push-to-talk vs open mic.
   - Validate browser support for Chrome/Firefox/Safari.
+  - Integrate LiveKit (SFU): Rails issues tokens, client connects via LiveKit SDK, and a separate LiveKit server handles media routing.
+  - Document LiveKit setup (server URL, API key/secret) and local dev flow.
 - Build `/beacon`:
   - Post status message to chat, display by username.
   - Default expiry 24 hours; new status overwrites existing.

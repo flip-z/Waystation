@@ -27,6 +27,7 @@ Rails.application.routes.draw do
   end
   resources :campfires, only: :show do
     patch :close, on: :member
+    post :voice_token, on: :member
     resources :campfire_messages, only: :create
   end
   resource :profile, only: %i[ edit update ]

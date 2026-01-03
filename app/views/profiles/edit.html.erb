@@ -13,7 +13,7 @@
       <%= f.text_field :handle, class: "input", required: true %>
     </div>
     <div>
-      <%= f.label :mic_mode, "Mic mode" %>
+      <%= f.label :mic_mode, "Default mic setting" %>
       <%= f.select :mic_mode, User.mic_modes.keys, {}, class: "input" %>
     </div>
     <div>

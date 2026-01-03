@@ -57,6 +57,9 @@ Avoid:
      - Voice max: 10 participants.
      - Push-to-talk or open-mic profile settings.
      - Browser-first support: latest Chrome, Firefox, Safari.
+     - LiveKit-powered voice (SFU) with a separate media server; Rails issues LiveKit tokens and handles call membership.
+     - LiveKit config via `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`.
+     - LiveKit setup guide: https://docs.livekit.io
   2. `/beacon`: sets a personal status that posts once to the channel and appears beside the user name.
      - Status expires after 24 hours or on manual clear.
      - Status message persists in chat history.

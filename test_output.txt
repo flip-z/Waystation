@@ -1,0 +1,80 @@
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Finished "/cable" [WebSocket] for 127.0.0.1 at 2026-01-03 14:42:07 -0500
+Ignoring message processed after the WebSocket was closed: "{\"command\":\"subscribe\",\"identifier\":\"{\\\"channel\\\":\\\"CampfireChannel\\\",\\\"room_id\\\":24,\\\"peer_id\\\":\\\"16f690e1-c83d-4202-b12e-3e7a73b2cd12\\\"}\"}")
+Finished "/cable" [WebSocket] for 127.0.0.1 at 2026-01-03 14:42:07 -0500
+Finished "/cable" [WebSocket] for 127.0.0.1 at 2026-01-03 14:42:07 -0500
+Finished "/cable" [WebSocket] for 127.0.0.1 at 2026-01-03 14:42:07 -0500
+Finished "/cable" [WebSocket] for 127.0.0.1 at 2026-01-03 14:42:07 -0500
+Turbo::StreamsChannel stopped streaming from chat_user_colors
+Turbo::StreamsChannel stopped streaming from Z2lkOi8vd2F5c3RhdGlvbi9DYW1wZmlyZVJvb20vMjQ:campfire_messages
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Started GET "/cable" for 127.0.0.1 at 2026-01-03 14:42:27 -0500
+Started GET "/cable" [WebSocket] for 127.0.0.1 at 2026-01-03 14:42:27 -0500
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Started GET "/cable" for 127.0.0.1 at 2026-01-03 14:42:27 -0500
+Started GET "/cable" [WebSocket] for 127.0.0.1 at 2026-01-03 14:42:27 -0500
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Subscription class not found: "CampfireChannel"
+Started GET "/cable" for 127.0.0.1 at 2026-01-03 14:42:27 -0500
+Started GET "/cable" [WebSocket] for 127.0.0.1 at 2026-01-03 14:42:27 -0500
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Subscription class not found: "NotificationChannel"
+Started GET "/cable" for 127.0.0.1 at 2026-01-03 14:42:27 -0500
+Started GET "/cable" [WebSocket] for 127.0.0.1 at 2026-01-03 14:42:27 -0500
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Started GET "/cable" for 127.0.0.1 at 2026-01-03 14:42:27 -0500
+Started GET "/cable" [WebSocket] for 127.0.0.1 at 2026-01-03 14:42:27 -0500
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Turbo::StreamsChannel is transmitting the subscription confirmation
+Turbo::StreamsChannel is streaming from chat_user_colors
+Turbo::StreamsChannel is transmitting the subscription confirmation
+Turbo::StreamsChannel is streaming from Z2lkOi8vd2F5c3RhdGlvbi9DYW1wZmlyZVJvb20vMjQ:campfire_messages
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "CampfireChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "CampfireChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "NotificationChannel"
+Subscription class not found: "CampfireChannel"

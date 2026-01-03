@@ -1,79 +1,61 @@
 import { Controller } from "@hotwired/stimulus"
 import { createConsumer } from "@rails/actioncable"
+import { Room, RoomEvent, Track } from "livekit-client"
 
 export default class extends Controller {
   static values = {
     roomId: Number,
     peerId: String,
     micMode: String,
+    voiceTokenUrl: String,
   }
-  static targets = ["audioButton", "peerList", "debug", "toneButton"]
+  static targets = ["audioButton", "micModeSelect", "peerList", "presenceCount", "pushToTalkButton", "voiceModeHint", "voiceToggle"]
 
   connect() {
-    this.peers = new Map()
-    this.localStream = null
     this.audioContext = null
-    this.meters = new Map()
     this.audioUnlocked = false
     this.debugMessages = []
+    this.audioElements = new Map()
+    this.presenceByPeerId = new Map()
+    this.presencePeers = new Map()
+    this.activeSpeakers = new Set()
+    this.voiceParticipants = new Set()
+    this.room = null
+    this.voiceConnected = false
+    this.pushToTalkKeyDown = false
     this.consumer = createConsumer()
     this.logDebug("Campfire controller connected.")
-    if (!navigator.mediaDevices?.getUserMedia) {
-      this.showStatus("Audio unavailable in this browser.")
-      this.logDebug("getUserMedia unavailable.")
+
+    if (!this.roomIdValue) {
+      this.showStatus("Missing room id for voice.")
+      this.logDebug("Missing room id; skipping voice setup.")
       return
     }
-    this.setupLocalAudio()
-      .then(() => this.subscribe())
-      .catch((error) => {
-        this.showStatus(`Audio error: ${error.message}`)
-        this.logDebug(`getUserMedia error: ${error.message}`)
-      })
+
+    this.subscribePresence()
+    this.bindPushToTalkHotkey()
+    this.updateVoiceControls()
+    this.connectLivekit().catch((error) => {
+      this.showStatus("Voice connection failed.")
+      this.logDebug(`LiveKit error: ${error.message || error}`)
+    })
   }
 
   disconnect() {
     if (this.subscription) this.subscription.unsubscribe()
-    this.peers.forEach((peer) => peer.connection.close())
-    this.peers.clear()
+    this.unbindPushToTalkHotkey()
+    this.disconnectLivekit()
+    this.audioElements.forEach((audio) => audio.remove())
+    this.audioElements.clear()
     if (this.audioContext) this.audioContext.close()
   }
 
-  async setupLocalAudio() {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    this.localStream = stream
-    this.logDebug("Microphone stream ready.")
-    const audioTrack = stream.getAudioTracks()[0]
-    if (audioTrack) {
-      this.logDebug(`Mic track enabled: ${audioTrack.enabled}`)
-      audioTrack.addEventListener("mute", () => this.logDebug("Mic track muted."))
-      audioTrack.addEventListener("unmute", () => this.logDebug("Mic track unmuted."))
-      audioTrack.addEventListener("ended", () => this.logDebug("Mic track ended."))
-    }
-    if (this.micModeValue === "push_to_talk") {
-      audioTrack.enabled = false
-      this.showStatus("Push-to-talk enabled. Hold the button to speak.")
-    } else {
-      audioTrack.enabled = true
-      this.showStatus("Open mic enabled.")
-    }
-    if (this.peerIdValue) {
-      this.ensurePeerIndicator(this.peerIdValue, "You", true)
-      this.setupAudioMeter(stream, this.peerIdValue)
-    }
-  }
-
-  subscribe() {
+  subscribePresence() {
     const peerId = this.peerIdValue || crypto.randomUUID()
     this.peerIdValue = peerId
-    const roomId = this.roomIdValue
-    if (!roomId) {
-      this.showStatus("Missing room id for voice.")
-      this.logDebug("Missing room id; skipping subscribe.")
-      return
-    }
     this.subscriptionConnected = false
     this.subscription = this.consumer.subscriptions.create(
-      { channel: "CampfireChannel", room_id: roomId, peer_id: peerId },
+      { channel: "CampfireChannel", room_id: this.roomIdValue, peer_id: peerId },
       {
         connected: () => {
           this.subscriptionConnected = true
@@ -85,172 +67,185 @@ export default class extends Controller {
         rejected: () => {
           this.logDebug("CampfireChannel rejected subscription.")
         },
-        received: (data) => this.handleSignal(data),
+        received: (data) => {
+          if (data.type === "participants") {
+            this.resetPresence(data.participants || [])
+          }
+          if (data.type === "join") {
+            this.addPresencePeer(data.participant)
+          }
+          if (data.type === "leave") {
+            this.removePresencePeer(data.participant)
+          }
+        },
       }
     )
-    this.showStatus("Connecting voice channel...")
-    this.logDebug(`Peer id: ${peerId}`)
-    this.logDebug(`Cable state: ${this.consumer.connection.getState()}`)
-    setTimeout(() => {
-      if (!this.subscriptionConnected) {
-        this.logDebug("No channel confirmation yet.")
-      }
-    }, 1200)
-    if (this.localStream) {
-      this.ensurePeerIndicator(peerId, "You", true)
-      this.setupAudioMeter(this.localStream, peerId)
-    }
+    this.logDebug(`Presence peer id: ${peerId}`)
   }
 
-  handleSignal(data) {
-    if (data.type === "participants") {
-      this.logDebug(`Participants: ${data.peers.length}`)
-      data.peers.filter((peer) => peer !== this.peerIdValue).forEach((peer) => {
-        this.ensurePeer(peer, true)
-      })
+  async connectLivekit() {
+    if (this.voiceConnected) return
+    if (!this.hasVoiceTokenUrlValue) {
+      this.showStatus("LiveKit token endpoint missing.")
+      this.logDebug("Missing campfire_voice_token_url.")
       return
     }
 
-    if (data.type === "leave" && data.peer_id) {
-      this.logDebug(`Peer left: ${data.peer_id}`)
-      this.removePeer(data.peer_id)
-      return
+    this.showStatus("Connecting voice server...")
+    const { token, url } = await this.fetchToken()
+    const room = new Room()
+    this.room = room
+
+    room.on(RoomEvent.ConnectionStateChanged, (state) => {
+      this.showStatus(`Voice state: ${state}`)
+      this.logDebug(`LiveKit state: ${state}`)
+    })
+
+    room.on(RoomEvent.ParticipantConnected, (participant) => {
+      this.addVoiceParticipant(participant.identity)
+      this.logDebug(`Participant joined: ${participant.identity}`)
+    })
+
+    room.on(RoomEvent.ParticipantDisconnected, (participant) => {
+      this.removeVoiceParticipant(participant.identity)
+      this.removePeer(participant.identity)
+      this.logDebug(`Participant left: ${participant.identity}`)
+    })
+
+    room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+      if (track.kind !== Track.Kind.Audio) return
+      if (participant.isLocal) return
+      this.attachRemoteAudio(participant.identity, track)
+    })
+
+    room.on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
+      if (track.kind !== Track.Kind.Audio) return
+      this.removeRemoteAudio(participant.identity)
+    })
+
+    room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
+      this.activeSpeakers = new Set(speakers.map((participant) => participant.identity))
+      this.updateSpeakingIndicators()
+    })
+
+    await room.connect(url, token, { autoSubscribe: true })
+    this.voiceConnected = true
+    this.syncVoiceParticipants()
+    this.updateVoiceControls()
+    this.renderPresence()
+
+    if (this.micModeValue === "push_to_talk") {
+      await room.localParticipant.setMicrophoneEnabled(false)
+      this.showStatus("Push-to-talk enabled. Hold the button to speak.")
+    } else {
+      await room.localParticipant.setMicrophoneEnabled(true)
+      this.showStatus("Open mic enabled.")
     }
 
-    if (data.type === "signal") {
-      if (data.target_id && data.target_id !== this.peerIdValue) return
-      if (!data.sender_id) return
-      this.logDebug(`Signal ${data.signal?.type} from ${data.sender_id}`)
-      this.handlePeerSignal(data.sender_id, data.signal)
-    }
+    this.logDebug("Connected to LiveKit.")
   }
 
-  ensurePeer(peerId, initiator = false) {
-    if (this.peers.has(peerId)) return
-    const connection = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  async fetchToken() {
+    const tokenUrl = this.voiceTokenUrlValue
+    const csrf = document.querySelector("meta[name=csrf-token]")?.content
+    const response = await fetch(tokenUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrf || "",
+      },
+      body: JSON.stringify({}),
     })
-
-    this.localStream.getTracks().forEach((track) => {
-      connection.addTrack(track, this.localStream)
-    })
-
-    connection.onicecandidate = (event) => {
-      if (!event.candidate) return
-      this.sendSignal(peerId, { type: "ice", candidate: event.candidate })
-    }
-
-    connection.ontrack = (event) => {
-      this.attachRemoteAudio(peerId, event.streams[0])
-    }
-
-    connection.oniceconnectionstatechange = () => {
-      this.showStatus(
-        `Peer ${peerId.slice(0, 4)} ICE: ${connection.iceConnectionState}`
-      )
-      this.logDebug(`ICE ${peerId.slice(0, 4)}: ${connection.iceConnectionState}`)
-    }
-
-    connection.onconnectionstatechange = () => {
-      this.showStatus(
-        `Peer ${peerId.slice(0, 4)} state: ${connection.connectionState}`
-      )
-      this.logDebug(`State ${peerId.slice(0, 4)}: ${connection.connectionState}`)
-      if (connection.connectionState === "connected") {
-        this.logStats(peerId)
+    if (!response.ok) {
+      const contentType = response.headers.get("content-type") || ""
+      const payload = await response.text()
+      let message = "Unable to fetch LiveKit token."
+      if (contentType.includes("application/json")) {
+        try {
+          const data = JSON.parse(payload)
+          message = data.error || message
+        } catch {
+          message = message
+        }
+      } else if (contentType.includes("text/html") || payload.trim().startsWith("<!DOCTYPE")) {
+        message = "LiveKit token endpoint returned HTML. Check server logs."
+      } else if (payload) {
+        message = payload
       }
+      message = this.compactError(message)
+      this.logDebug(`LiveKit token error (${response.status}): ${message}`)
+      throw new Error(message)
     }
-
-    connection.onicecandidateerror = () => {
-      this.showStatus(`Peer ${peerId.slice(0, 4)} ICE error`)
-      this.logDebug(`ICE error ${peerId.slice(0, 4)}`)
-    }
-
-    this.peers.set(peerId, { connection, stream: null })
-    this.ensurePeerIndicator(peerId, `Peer ${peerId.slice(0, 4)}`, false)
-
-    if (initiator) {
-      connection
-        .createOffer()
-        .then((offer) => connection.setLocalDescription(offer))
-        .then(() => {
-          this.sendSignal(peerId, { type: "offer", sdp: connection.localDescription })
-        })
-        .catch((error) => {
-          this.showStatus(`Offer error: ${error.message}`)
-        })
-    }
+    return response.json()
   }
 
-  handlePeerSignal(peerId, signal) {
-    this.ensurePeer(peerId, false)
-    const { connection } = this.peers.get(peerId)
-
-    if (signal.type === "offer") {
-      connection
-        .setRemoteDescription(new RTCSessionDescription(signal.sdp))
-        .then(() => connection.createAnswer())
-        .then((answer) => connection.setLocalDescription(answer))
-        .then(() => {
-          this.sendSignal(peerId, { type: "answer", sdp: connection.localDescription })
-        })
-        .catch((error) => {
-          this.showStatus(`Answer error: ${error.message}`)
-        })
-    } else if (signal.type === "answer") {
-      connection.setRemoteDescription(new RTCSessionDescription(signal.sdp))
-    } else if (signal.type === "ice") {
-      connection.addIceCandidate(new RTCIceCandidate(signal.candidate))
-    }
-  }
-
-  attachRemoteAudio(peerId, stream) {
-    if (this.peers.get(peerId)?.stream) return
-    const audio = document.createElement("audio")
+  attachRemoteAudio(identity, track) {
+    if (this.audioElements.has(identity)) return
+    const audio = track.attach()
     audio.autoplay = true
     audio.playsInline = true
-    audio.muted = false
-    audio.volume = 1
-    audio.srcObject = stream
-    audio.dataset.peer = peerId
-    audio.addEventListener("play", () => this.logDebug(`Audio playing: ${peerId.slice(0, 4)}`))
+    audio.dataset.peer = identity
     this.element.querySelector(".campfire-audio").appendChild(audio)
-    this.peers.get(peerId).stream = stream
-    this.setupAudioMeter(stream, peerId)
+    this.audioElements.set(identity, audio)
     this.playAudio(audio)
-    this.logDebug(`Remote audio attached: ${peerId.slice(0, 4)}`)
+    this.logDebug(`Remote audio attached: ${identity}`)
   }
 
-  removePeer(peerId) {
-    const peer = this.peers.get(peerId)
-    if (!peer) return
-    peer.connection.close()
-    this.peers.delete(peerId)
-    const audio = this.element.querySelector(`audio[data-peer="${peerId}"]`)
+  removeRemoteAudio(identity) {
+    const audio = this.audioElements.get(identity)
     if (audio) audio.remove()
-    const indicator = this.element.querySelector(`[data-peer-indicator="${peerId}"]`)
-    if (indicator) indicator.remove()
+    this.audioElements.delete(identity)
   }
 
-  sendSignal(targetId, signal) {
-    if (!this.subscription) return
-    this.subscription.perform("signal", { target_id: targetId, signal })
+  removePeer(identity) {
+    this.removeRemoteAudio(identity)
+  }
+
+  toggleVoice() {
+    if (this.voiceConnected) {
+      this.leaveVoice()
+    } else {
+      this.joinVoice()
+    }
+  }
+
+  async joinVoice() {
+    await this.connectLivekit()
+  }
+
+  leaveVoice() {
+    this.disconnectLivekit()
+    this.showStatus("Voice disconnected.")
+    this.logDebug("Disconnected from LiveKit.")
+  }
+
+  disconnectLivekit() {
+    if (!this.room) return
+    this.room.disconnect()
+    this.room = null
+    this.voiceConnected = false
+    this.activeSpeakers = new Set()
+    this.voiceParticipants = new Set()
+    this.audioElements.forEach((audio) => audio.remove())
+    this.audioElements.clear()
+    this.hideAudioButton()
+    this.updateSpeakingIndicators()
+    this.updateVoicePresenceIndicators()
+    this.updateVoiceControls()
   }
 
   pushToTalkStart() {
     if (this.micModeValue !== "push_to_talk") return
-    const track = this.localStream?.getAudioTracks()[0]
-    if (track) {
-      track.enabled = true
+    if (this.room) {
+      this.room.localParticipant.setMicrophoneEnabled(true)
       this.logDebug("Push-to-talk: mic enabled.")
     }
   }
 
   pushToTalkEnd() {
     if (this.micModeValue !== "push_to_talk") return
-    const track = this.localStream?.getAudioTracks()[0]
-    if (track) {
-      track.enabled = false
+    if (this.room) {
+      this.room.localParticipant.setMicrophoneEnabled(false)
       this.logDebug("Push-to-talk: mic disabled.")
     }
   }
@@ -270,25 +265,21 @@ export default class extends Controller {
     })
   }
 
-  playTestTone() {
-    if (!window.AudioContext && !window.webkitAudioContext) {
-      this.showStatus("Audio unavailable in this browser.")
-      return
+  async changeMicMode(event) {
+    const selected = event?.target?.value
+    if (!selected || selected === this.micModeValue) return
+    this.micModeValue = selected
+    this.updateVoiceControls()
+
+    if (this.room && this.voiceConnected) {
+      if (this.micModeValue === "push_to_talk") {
+        await this.room.localParticipant.setMicrophoneEnabled(false)
+      } else {
+        await this.room.localParticipant.setMicrophoneEnabled(true)
+      }
     }
-    if (!this.audioContext) {
-      this.audioContext = new (window.AudioContext || window.webkitAudioContext)()
-    }
-    if (this.audioContext.state === "suspended") {
-      this.audioContext.resume()
-    }
-    const oscillator = this.audioContext.createOscillator()
-    const gain = this.audioContext.createGain()
-    oscillator.frequency.value = 440
-    gain.gain.value = 0.2
-    oscillator.connect(gain).connect(this.audioContext.destination)
-    oscillator.start()
-    oscillator.stop(this.audioContext.currentTime + 0.25)
-    this.logDebug("Test tone played.")
+
+    await this.persistMicMode()
   }
 
   playAudio(audio) {
@@ -317,39 +308,166 @@ export default class extends Controller {
     this.audioButtonTarget.hidden = true
   }
 
-  ensurePeerIndicator(peerId, label, isLocal) {
-    if (!this.hasPeerListTarget) return
-    if (this.element.querySelector(`[data-peer-indicator="${peerId}"]`)) return
-    const indicator = document.createElement("div")
-    indicator.className = `peer-indicator ${isLocal ? "peer-indicator-local" : "peer-indicator-remote"}`
-    indicator.dataset.peerIndicator = peerId
-    indicator.textContent = label
-    this.peerListTarget.appendChild(indicator)
+  resetPresence(participants) {
+    this.presenceByPeerId.clear()
+    this.presencePeers.clear()
+    participants.forEach((participant) => this.trackPresence(participant))
+    this.renderPresence()
   }
 
-  setupAudioMeter(stream, peerId) {
-    if (!window.AudioContext && !window.webkitAudioContext) return
-    if (!this.audioContext) {
-      this.audioContext = new (window.AudioContext || window.webkitAudioContext)()
-    }
+  addPresencePeer(participant) {
+    if (!participant) return
+    this.trackPresence(participant)
+    this.renderPresence()
+  }
 
-    const source = this.audioContext.createMediaStreamSource(stream)
-    const analyser = this.audioContext.createAnalyser()
-    analyser.fftSize = 512
-    source.connect(analyser)
-    const dataArray = new Uint8Array(analyser.frequencyBinCount)
-    this.meters.set(peerId, { analyser, dataArray })
-
-    const tick = () => {
-      analyser.getByteFrequencyData(dataArray)
-      const average = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length
-      const indicator = this.element.querySelector(`[data-peer-indicator="${peerId}"]`)
-      if (indicator) {
-        indicator.classList.toggle("speaking", average > 28)
-      }
-      requestAnimationFrame(tick)
+  removePresencePeer(participant) {
+    if (!participant) return
+    const peerId = participant.peer_id
+    const userId = participant.user_id ? String(participant.user_id) : this.presenceByPeerId.get(peerId)?.userId
+    if (!peerId || !userId) return
+    this.presenceByPeerId.delete(peerId)
+    const entry = this.presencePeers.get(userId)
+    if (!entry) return
+    entry.count -= 1
+    if (entry.count <= 0) {
+      this.presencePeers.delete(userId)
+    } else {
+      this.presencePeers.set(userId, entry)
     }
-    requestAnimationFrame(tick)
+    this.renderPresence()
+  }
+
+  trackPresence(participant) {
+    const peerId = participant.peer_id
+    const userId = participant.user_id ? String(participant.user_id) : null
+    if (!peerId || !userId) return
+    this.presenceByPeerId.set(peerId, { userId: userId })
+    const entry = this.presencePeers.get(userId) || { count: 0, handle: participant.handle }
+    entry.count += 1
+    if (!entry.handle && participant.handle) entry.handle = participant.handle
+    this.presencePeers.set(userId, entry)
+  }
+
+  renderPresence() {
+    if (!this.hasPeerListTarget) return
+    this.peerListTarget.innerHTML = ""
+    const entries = Array.from(this.presencePeers.entries()).map(([userId, data]) => ({
+      userId: userId,
+      label: this.displayNameForPresence(userId, data.handle),
+    }))
+    entries.sort((a, b) => a.label.localeCompare(b.label))
+    entries.forEach((entry) => {
+      const item = document.createElement("li")
+      const indicator = document.createElement("span")
+      indicator.className = "talk-indicator"
+      indicator.dataset.peerIndicator = entry.userId
+      indicator.textContent = "o"
+      const voiceStatus = document.createElement("span")
+      voiceStatus.className = "voice-indicator"
+      voiceStatus.dataset.voiceIndicator = entry.userId
+      voiceStatus.setAttribute("aria-hidden", "true")
+      voiceStatus.setAttribute("title", "Not in voice")
+      const name = document.createElement("span")
+      name.classList.add(`chat-user-${entry.userId}`)
+      name.dataset.peerName = "true"
+      name.textContent = entry.label
+      item.append(indicator, voiceStatus, name)
+      this.peerListTarget.appendChild(item)
+    })
+    this.updatePresenceCount()
+    this.updateSpeakingIndicators()
+    this.updateVoicePresenceIndicators()
+  }
+
+  displayNameForPresence(userId, handle) {
+    if (this.room?.localParticipant?.identity === userId) return "You"
+    if (handle) return handle
+    return `User ${userId}`
+  }
+
+  updateSpeakingIndicators() {
+    this.element.querySelectorAll("[data-peer-indicator]").forEach((indicator) => {
+      const id = indicator.dataset.peerIndicator
+      indicator.classList.toggle("speaking", this.activeSpeakers.has(id))
+    })
+  }
+
+  updateVoicePresenceIndicators() {
+    this.element.querySelectorAll("[data-voice-indicator]").forEach((indicator) => {
+      const id = indicator.dataset.voiceIndicator
+      indicator.hidden = !this.voiceConnected || this.voiceParticipants.has(id)
+    })
+  }
+
+  updatePresenceCount() {
+    if (!this.hasPresenceCountTarget) return
+    this.presenceCountTarget.textContent = `(${this.presencePeers.size})`
+  }
+
+  updateVoiceControls() {
+    if (this.hasMicModeSelectTarget) {
+      this.micModeSelectTarget.value = this.micModeValue
+    }
+    if (this.hasVoiceModeHintTarget) {
+      this.voiceModeHintTarget.textContent = this.micModeValue === "push_to_talk" ? "Hotkey ` (works while typing)" : ""
+    }
+    if (this.hasPushToTalkButtonTarget) {
+      const isPushToTalk = this.micModeValue === "push_to_talk"
+      this.pushToTalkButtonTarget.hidden = !isPushToTalk
+      this.pushToTalkButtonTarget.disabled = !this.voiceConnected
+      this.pushToTalkButtonTarget.setAttribute("aria-disabled", String(!this.voiceConnected))
+    }
+    if (this.hasVoiceToggleTarget) {
+      this.voiceToggleTarget.textContent = this.voiceConnected ? "Leave Voice" : "Join Voice"
+      this.voiceToggleTarget.classList.toggle("button-voice-join", !this.voiceConnected)
+      this.voiceToggleTarget.classList.toggle("button-voice-leave", this.voiceConnected)
+    }
+  }
+
+  bindPushToTalkHotkey() {
+    this.handlePushToTalkKeydown = this.handlePushToTalkKeydown.bind(this)
+    this.handlePushToTalkKeyup = this.handlePushToTalkKeyup.bind(this)
+    window.addEventListener("keydown", this.handlePushToTalkKeydown)
+    window.addEventListener("keyup", this.handlePushToTalkKeyup)
+  }
+
+  unbindPushToTalkHotkey() {
+    if (this.handlePushToTalkKeydown) {
+      window.removeEventListener("keydown", this.handlePushToTalkKeydown)
+      window.removeEventListener("keyup", this.handlePushToTalkKeyup)
+    }
+  }
+
+  handlePushToTalkKeydown(event) {
+    if (!this.shouldHandlePushToTalk(event)) return
+    if (event.repeat) return
+    this.pushToTalkKeyDown = true
+    this.maybePreventPushToTalkKey(event)
+    this.pushToTalkStart()
+  }
+
+  handlePushToTalkKeyup(event) {
+    if (!this.shouldHandlePushToTalk(event)) return
+    if (!this.pushToTalkKeyDown) return
+    this.pushToTalkKeyDown = false
+    this.maybePreventPushToTalkKey(event)
+    this.pushToTalkEnd()
+  }
+
+  shouldHandlePushToTalk(event) {
+    if (this.micModeValue !== "push_to_talk") return false
+    if (!this.voiceConnected || !this.room) return false
+    if (event.code !== "Backquote") return false
+    if (event.altKey || event.ctrlKey || event.metaKey) return false
+    return true
+  }
+
+  maybePreventPushToTalkKey(event) {
+    const target = event.target
+    const tag = target?.tagName?.toLowerCase()
+    const isInput = tag === "input" || tag === "textarea" || target?.isContentEditable
+    if (isInput) event.preventDefault()
   }
 
   showStatus(message) {
@@ -357,38 +475,64 @@ export default class extends Controller {
     if (status) status.textContent = message
   }
 
+  syncVoiceParticipants() {
+    if (!this.room) return
+    this.voiceParticipants = new Set()
+    if (this.room.localParticipant?.identity) {
+      this.voiceParticipants.add(this.room.localParticipant.identity)
+    }
+    this.room.remoteParticipants.forEach((participant) => {
+      this.voiceParticipants.add(participant.identity)
+    })
+    this.updateVoicePresenceIndicators()
+  }
+
+  addVoiceParticipant(identity) {
+    if (!identity) return
+    this.voiceParticipants.add(identity)
+    this.updateVoicePresenceIndicators()
+  }
+
+  removeVoiceParticipant(identity) {
+    if (!identity) return
+    this.voiceParticipants.delete(identity)
+    this.updateVoicePresenceIndicators()
+  }
+
+  async persistMicMode() {
+    const csrf = document.querySelector("meta[name=csrf-token]")?.content
+    try {
+      const response = await fetch("/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "X-CSRF-Token": csrf || "",
+        },
+        body: JSON.stringify({ user: { mic_mode: this.micModeValue } }),
+      })
+      if (!response.ok) {
+        const payload = await response.text()
+        this.logDebug(`Mic mode update failed (${response.status}): ${payload}`)
+      }
+    } catch (error) {
+      this.logDebug(`Mic mode update failed: ${error.message || error}`)
+    }
+  }
+
   logDebug(message) {
     if (!this.hasDebugTarget) return
     const timestamp = new Date().toLocaleTimeString()
-    this.debugMessages.unshift(`[${timestamp}] ${message}`)
+    this.debugMessages.unshift(`[${timestamp}] ${this.compactError(message)}`)
     this.debugMessages = this.debugMessages.slice(0, 6)
     this.debugTarget.textContent = this.debugMessages.join("\n")
   }
 
-  logStats(peerId) {
-    const peer = this.peers.get(peerId)
-    if (!peer) return
-    peer.connection.getStats(null).then((stats) => {
-      let inbound = null
-      let outbound = null
-      stats.forEach((report) => {
-        if (report.type === "inbound-rtp" && report.kind === "audio") {
-          inbound = report
-        }
-        if (report.type === "outbound-rtp" && report.kind === "audio") {
-          outbound = report
-        }
-      })
-      if (inbound) {
-        this.logDebug(
-          `Inbound audio bytes: ${inbound.bytesReceived || 0}`
-        )
-      }
-      if (outbound) {
-        this.logDebug(
-          `Outbound audio bytes: ${outbound.bytesSent || 0}`
-        )
-      }
-    })
+  compactError(message) {
+    if (!message) return "Unknown error"
+    const trimmed = String(message).replace(/\s+/g, " ").trim()
+    const max = 200
+    if (trimmed.length <= max) return trimmed
+    return `${trimmed.slice(0, max)}...`
   }
 }

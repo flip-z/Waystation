@@ -1457,3 +1457,941 @@ CampfireChannelTest: test_broadcasts_presence_on_subscribe_and_unsubscribe
   Rendered campfires/_presence.html.erb (Duration: 0.0ms | GC: 0.0ms)
 [ActionCable] Broadcasting to campfire_presence: "<turbo-stream action=\"replace\" target=\"campfire_presence_980190964\"><template><div class=\"campfire-presence\" id=\"campfire_presence_980190964\">\n  <div class=\"campfire-presence-header\">\n    <div class=\"muted\">Campfire guests:</div>\n    <div class=\"muted\">Messages: 0</div>\n  </div...
   [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+[ActionCable] Channel files loaded.
+  [1m[36mActiveRecord::InternalMetadata Load (2.0ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "schema_sha1"]]
+[ActionCable] Channel files loaded.
+  [1m[36mActiveRecord::SchemaMigration Load (1.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.8ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public[0m
+  [1m[35m (238.6ms)[0m  [1m[35mDROP DATABASE IF EXISTS "waystation_test"[0m
+  [1m[35m (229.7ms)[0m  [1m[35mCREATE DATABASE "waystation_test" ENCODING = 'unicode'[0m
+  [1m[35mSQL (8.0ms)[0m  [1m[35mCREATE EXTENSION IF NOT EXISTS "plpgsql" SCHEMA pg_catalog[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "campfire_messages" CASCADE[0m
+  [1m[35m (3.8ms)[0m  [1m[35mCREATE TABLE "campfire_messages" ("id" bigserial primary key, "body" text NOT NULL, "campfire_room_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, "user_id" bigint NOT NULL)[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_campfire_messages_on_campfire_room_id" ON "campfire_messages" ("campfire_room_id")[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_campfire_messages_on_created_at" ON "campfire_messages" ("created_at")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_campfire_messages_on_user_id" ON "campfire_messages" ("user_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "campfire_participants" CASCADE[0m
+  [1m[35m (3.1ms)[0m  [1m[35mCREATE TABLE "campfire_participants" ("id" bigserial primary key, "campfire_room_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "last_seen_at" timestamp(6) NOT NULL, "peer_id" character varying NOT NULL, "updated_at" timestamp(6) NOT NULL, "user_id" bigint NOT NULL)[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_campfire_participants_on_campfire_room_id_and_peer_id" ON "campfire_participants" ("campfire_room_id", "peer_id")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_campfire_participants_on_campfire_room_id" ON "campfire_participants" ("campfire_room_id")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_campfire_participants_on_user_id" ON "campfire_participants" ("user_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "campfire_rooms" CASCADE[0m
+  [1m[35m (1.5ms)[0m  [1m[35mCREATE TABLE "campfire_rooms" ("id" bigserial primary key, "active" boolean DEFAULT TRUE NOT NULL, "created_at" timestamp(6) NOT NULL, "created_by_id" bigint NOT NULL, "ended_at" timestamp(6), "last_empty_at" timestamp(6), "name" character varying NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE INDEX "index_campfire_rooms_on_active" ON "campfire_rooms" ("active")[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE INDEX "index_campfire_rooms_on_created_by_id" ON "campfire_rooms" ("created_by_id")[0m
+  [1m[35m (3.1ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_campfire_rooms_on_name" ON "campfire_rooms" ("name")[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE IF EXISTS "chat_messages" CASCADE[0m
+  [1m[35m (3.6ms)[0m  [1m[35mCREATE TABLE "chat_messages" ("id" bigserial primary key, "body" text NOT NULL, "created_at" timestamp(6) NOT NULL, "message_type" integer DEFAULT 0 NOT NULL, "metadata" jsonb DEFAULT '{}' NOT NULL, "updated_at" timestamp(6) NOT NULL, "user_id" bigint NOT NULL)[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE INDEX "index_chat_messages_on_created_at" ON "chat_messages" ("created_at")[0m
+  [1m[35m (2.4ms)[0m  [1m[35mCREATE INDEX "index_chat_messages_on_message_type" ON "chat_messages" ("message_type")[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_chat_messages_on_user_id" ON "chat_messages" ("user_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "chat_reactions" CASCADE[0m
+  [1m[35m (1.6ms)[0m  [1m[35mCREATE TABLE "chat_reactions" ("id" bigserial primary key, "chat_message_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "emoji" character varying NOT NULL, "updated_at" timestamp(6) NOT NULL, "user_id" bigint NOT NULL)[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_chat_reactions_on_chat_message_id_and_user_id_and_emoji" ON "chat_reactions" ("chat_message_id", "user_id", "emoji")[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_chat_reactions_on_chat_message_id" ON "chat_reactions" ("chat_message_id")[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_chat_reactions_on_user_id" ON "chat_reactions" ("user_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "invites" CASCADE[0m
+  [1m[35m (1.7ms)[0m  [1m[35mCREATE TABLE "invites" ("id" bigserial primary key, "created_at" timestamp(6) NOT NULL, "email" character varying NOT NULL, "expires_at" timestamp(6) NOT NULL, "invited_by_id" bigint NOT NULL, "role" integer DEFAULT 0 NOT NULL, "token" character varying NOT NULL, "updated_at" timestamp(6) NOT NULL, "used_at" timestamp(6))[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_invites_on_invited_by_id" ON "invites" ("invited_by_id")[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_invites_on_token" ON "invites" ("token")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "mentions" CASCADE[0m
+  [1m[35m (2.1ms)[0m  [1m[35mCREATE TABLE "mentions" ("id" bigserial primary key, "chat_message_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, "user_id" bigint NOT NULL)[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_mentions_on_chat_message_id_and_user_id" ON "mentions" ("chat_message_id", "user_id")[0m
+  [1m[35m (1.9ms)[0m  [1m[35mCREATE INDEX "index_mentions_on_chat_message_id" ON "mentions" ("chat_message_id")[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE INDEX "index_mentions_on_user_id" ON "mentions" ("user_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "post_tags" CASCADE[0m
+  [1m[35m (2.4ms)[0m  [1m[35mCREATE TABLE "post_tags" ("id" bigserial primary key, "created_at" timestamp(6) NOT NULL, "post_id" bigint NOT NULL, "tag_id" bigint NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (1.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_post_tags_on_post_id_and_tag_id" ON "post_tags" ("post_id", "tag_id")[0m
+  [1m[35m (1.5ms)[0m  [1m[35mCREATE INDEX "index_post_tags_on_post_id" ON "post_tags" ("post_id")[0m
+  [1m[35m (1.6ms)[0m  [1m[35mCREATE INDEX "index_post_tags_on_tag_id" ON "post_tags" ("tag_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "posts" CASCADE[0m
+  [1m[35m (4.2ms)[0m  [1m[35mCREATE TABLE "posts" ("id" bigserial primary key, "body_markdown" text NOT NULL, "created_at" timestamp(6) NOT NULL, "published_at" timestamp(6), "slug" character varying NOT NULL, "status" integer DEFAULT 0 NOT NULL, "title" character varying NOT NULL, "updated_at" timestamp(6) NOT NULL, "view_count" integer DEFAULT 0 NOT NULL)[0m
+  [1m[35m (1.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_posts_on_slug" ON "posts" ("slug")[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE INDEX "index_posts_on_status" ON "posts" ("status")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "tags" CASCADE[0m
+  [1m[35m (3.2ms)[0m  [1m[35mCREATE TABLE "tags" ("id" bigserial primary key, "created_at" timestamp(6) NOT NULL, "name" character varying NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_tags_on_name" ON "tags" ("name")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "users" CASCADE[0m
+  [1m[35m (4.1ms)[0m  [1m[35mCREATE TABLE "users" ("id" bigserial primary key, "chat_color" character varying DEFAULT 'phosphor_green' NOT NULL, "chat_sound" character varying DEFAULT 'beep' NOT NULL, "created_at" timestamp(6) NOT NULL, "email" character varying NOT NULL, "handle" character varying NOT NULL, "last_signed_in_at" timestamp(6), "magic_link_expires_at" timestamp(6), "magic_link_sent_at" timestamp(6), "magic_link_token" character varying, "mic_mode" integer DEFAULT 0 NOT NULL, "role" integer DEFAULT 0 NOT NULL, "status_expires_at" timestamp(6), "status_message" character varying, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE INDEX "index_users_on_chat_color" ON "users" ("chat_color")[0m
+  [1m[35m (4.7ms)[0m  [1m[35mCREATE INDEX "index_users_on_chat_sound" ON "users" ("chat_sound")[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_users_on_email" ON "users" ("email")[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_users_on_handle" ON "users" ("handle")[0m
+  [1m[35m (1.0ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_users_on_magic_link_token" ON "users" ("magic_link_token")[0m
+  [1m[35m (1.8ms)[0m  [1m[35mALTER TABLE "campfire_messages" ADD CONSTRAINT "fk_rails_e97c1c49ab"
+FOREIGN KEY ("campfire_room_id")
+  REFERENCES "campfire_rooms" ("id")
+[0m
+  [1m[35m (1.0ms)[0m  [1m[35mALTER TABLE "campfire_messages" ADD CONSTRAINT "fk_rails_bda2e20329"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (1.1ms)[0m  [1m[35mALTER TABLE "campfire_participants" ADD CONSTRAINT "fk_rails_22fd97080e"
+FOREIGN KEY ("campfire_room_id")
+  REFERENCES "campfire_rooms" ("id")
+[0m
+  [1m[35m (0.7ms)[0m  [1m[35mALTER TABLE "campfire_participants" ADD CONSTRAINT "fk_rails_c5ebb170ee"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "campfire_rooms" ADD CONSTRAINT "fk_rails_4dc3ebe501"
+FOREIGN KEY ("created_by_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (0.8ms)[0m  [1m[35mALTER TABLE "chat_messages" ADD CONSTRAINT "fk_rails_918ef7acc4"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (0.8ms)[0m  [1m[35mALTER TABLE "chat_reactions" ADD CONSTRAINT "fk_rails_542f974330"
+FOREIGN KEY ("chat_message_id")
+  REFERENCES "chat_messages" ("id")
+[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "chat_reactions" ADD CONSTRAINT "fk_rails_649df3581d"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (0.6ms)[0m  [1m[35mALTER TABLE "invites" ADD CONSTRAINT "fk_rails_3f0a52c661"
+FOREIGN KEY ("invited_by_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (0.8ms)[0m  [1m[35mALTER TABLE "mentions" ADD CONSTRAINT "fk_rails_aca1b5ac5c"
+FOREIGN KEY ("chat_message_id")
+  REFERENCES "chat_messages" ("id")
+[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "mentions" ADD CONSTRAINT "fk_rails_1b711e94aa"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+[0m
+  [1m[35m (0.9ms)[0m  [1m[35mALTER TABLE "post_tags" ADD CONSTRAINT "fk_rails_fdf74b486b"
+FOREIGN KEY ("post_id")
+  REFERENCES "posts" ("id")
+[0m
+  [1m[35m (1.0ms)[0m  [1m[35mALTER TABLE "post_tags" ADD CONSTRAINT "fk_rails_c9d8c5063e"
+FOREIGN KEY ("tag_id")
+  REFERENCES "tags" ("id")
+[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY)[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.7ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[35m (0.5ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES (20260103023128)[0m
+  [1m[35m (0.5ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES
+(20260103022227),
+(20260103022221),
+(20260103014742),
+(20260103012743),
+(20260102213640),
+(20260102195232),
+(20260102195228),
+(20260102195224),
+(20260102195219),
+(20260102195215),
+(20260102192021),
+(20260102192018),
+(20260102192015),
+(20260102192012),
+(20260102192008);[0m
+  [1m[35m (3.1ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[36mActiveRecord::InternalMetadata Load (1.6ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[36mActiveRecord::InternalMetadata Create (0.6ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'test', '2026-01-03 15:09:33.989987', '2026-01-03 15:09:33.989990') RETURNING "key"[0m
+  [1m[36mActiveRecord::InternalMetadata Load (1.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[36mActiveRecord::InternalMetadata Load (0.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "schema_sha1"]]
+  [1m[36mActiveRecord::InternalMetadata Create (0.3ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('schema_sha1', 'd067db007a071ffbf329fa36bd83a5fb675a481c', '2026-01-03 15:09:33.993775', '2026-01-03 15:09:33.993778') RETURNING "key"[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.6ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (2.8ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (12.1ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 15:09:34.093603', '2026-01-03 15:09:34.093603', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 15:09:34.093603', '2026-01-03 15:09:34.093603', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 15:09:34.113787', '2026-01-02 21:22:21', 'MyString', '2026-01-03 15:09:34.113787', 980190962), (298486374, 298486374, '2026-01-03 15:09:34.113787', '2026-01-02 21:22:21', 'MyString', '2026-01-03 15:09:34.113787', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 15:09:34.115701', 980190962, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 15:09:34.115701'), (298486374, FALSE, '2026-01-03 15:09:34.115701', 298486374, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 15:09:34.115701');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 15:09:34.117055', 1, '{}', '2026-01-03 15:09:34.117055', 980190962), (298486374, 'MyText', '2026-01-03 15:09:34.117055', 1, '{}', '2026-01-03 15:09:34.117055', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 15:09:34.118867', 'MyString', '2026-01-03 15:09:34.118867', 980190962), (298486374, 298486374, '2026-01-03 15:09:34.118867', 'MyString', '2026-01-03 15:09:34.118867', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 15:09:34.120706', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 15:09:34.120706', '2026-01-02 14:20:12'), (298486374, '2026-01-03 15:09:34.120706', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 15:09:34.120706', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 15:09:34.122485', '2026-01-03 15:09:34.122485', 980190962), (298486374, 298486374, '2026-01-03 15:09:34.122485', '2026-01-03 15:09:34.122485', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 15:09:34.124041', 980190962, 980190962, '2026-01-03 15:09:34.124041'), (298486374, '2026-01-03 15:09:34.124041', 298486374, 298486374, '2026-01-03 15:09:34.124041');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 15:09:34.126566', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 15:09:34.126566', 1), (298486374, 'MyText', '2026-01-03 15:09:34.126566', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 15:09:34.126566', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 15:09:34.127894', 'alpha', '2026-01-03 15:09:34.127894'), (298486374, '2026-01-03 15:09:34.127894', 'beta', '2026-01-03 15:09:34.127894');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 15:09:34.129021', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 15:09:34.129021'), (298486374, DEFAULT, DEFAULT, '2026-01-03 15:09:34.129021', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 15:09:34.129021')[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (1.5ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (3.7ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 15:09:34.169254', '2026-01-03 15:09:34.169254', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 15:09:34.169254', '2026-01-03 15:09:34.169254', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 15:09:34.169330', '2026-01-02 21:22:21', 'MyString', '2026-01-03 15:09:34.169330', 980190962), (298486374, 298486374, '2026-01-03 15:09:34.169330', '2026-01-02 21:22:21', 'MyString', '2026-01-03 15:09:34.169330', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 15:09:34.169359', 980190962, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 15:09:34.169359'), (298486374, FALSE, '2026-01-03 15:09:34.169359', 298486374, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 15:09:34.169359');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 15:09:34.169385', 1, '{}', '2026-01-03 15:09:34.169385', 980190962), (298486374, 'MyText', '2026-01-03 15:09:34.169385', 1, '{}', '2026-01-03 15:09:34.169385', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 15:09:34.169412', 'MyString', '2026-01-03 15:09:34.169412', 980190962), (298486374, 298486374, '2026-01-03 15:09:34.169412', 'MyString', '2026-01-03 15:09:34.169412', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 15:09:34.169438', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 15:09:34.169438', '2026-01-02 14:20:12'), (298486374, '2026-01-03 15:09:34.169438', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 15:09:34.169438', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 15:09:34.169465', '2026-01-03 15:09:34.169465', 980190962), (298486374, 298486374, '2026-01-03 15:09:34.169465', '2026-01-03 15:09:34.169465', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 15:09:34.169487', 980190962, 980190962, '2026-01-03 15:09:34.169487'), (298486374, '2026-01-03 15:09:34.169487', 298486374, 298486374, '2026-01-03 15:09:34.169487');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 15:09:34.169511', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 15:09:34.169511', 1), (298486374, 'MyText', '2026-01-03 15:09:34.169511', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 15:09:34.169511', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 15:09:34.169541', 'alpha', '2026-01-03 15:09:34.169541'), (298486374, '2026-01-03 15:09:34.169541', 'beta', '2026-01-03 15:09:34.169541');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 15:09:34.169557', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 15:09:34.169557'), (298486374, DEFAULT, DEFAULT, '2026-01-03 15:09:34.169557', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 15:09:34.169557')[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+[ActionCable] Channel files loaded.
+  [1m[36mActiveRecord::InternalMetadata Load (8.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "schema_sha1"]]
+  [1m[36mActiveRecord::SchemaMigration Load (1.7ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (4.0ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (11.7ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 19:27:39.744129', '2026-01-03 19:27:39.744129', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 19:27:39.744129', '2026-01-03 19:27:39.744129', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:27:39.762841', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:27:39.762841', 980190962), (298486374, 298486374, '2026-01-03 19:27:39.762841', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:27:39.762841', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 19:27:39.765421', 980190962, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:27:39.765421'), (298486374, FALSE, '2026-01-03 19:27:39.765421', 298486374, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:27:39.765421');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 19:27:39.767105', 1, '{}', '2026-01-03 19:27:39.767105', 980190962), (298486374, 'MyText', '2026-01-03 19:27:39.767105', 1, '{}', '2026-01-03 19:27:39.767105', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:27:39.770063', 'MyString', '2026-01-03 19:27:39.770063', 980190962), (298486374, 298486374, '2026-01-03 19:27:39.770063', 'MyString', '2026-01-03 19:27:39.770063', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 19:27:39.775251', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 19:27:39.775251', '2026-01-02 14:20:12'), (298486374, '2026-01-03 19:27:39.775251', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 19:27:39.775251', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:27:39.778187', '2026-01-03 19:27:39.778187', 980190962), (298486374, 298486374, '2026-01-03 19:27:39.778187', '2026-01-03 19:27:39.778187', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 19:27:39.784299', 980190962, 980190962, '2026-01-03 19:27:39.784299'), (298486374, '2026-01-03 19:27:39.784299', 298486374, 298486374, '2026-01-03 19:27:39.784299');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 19:27:39.786776', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 19:27:39.786776', 1), (298486374, 'MyText', '2026-01-03 19:27:39.786776', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 19:27:39.786776', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 19:27:39.792498', 'alpha', '2026-01-03 19:27:39.792498'), (298486374, '2026-01-03 19:27:39.792498', 'beta', '2026-01-03 19:27:39.792498');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 19:27:39.794241', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 19:27:39.794241'), (298486374, DEFAULT, DEFAULT, '2026-01-03 19:27:39.794241', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 19:27:39.794241')[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.7ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (1.4ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 19:27:39.826965', '2026-01-03 19:27:39.826965', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 19:27:39.826965', '2026-01-03 19:27:39.826965', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:27:39.827047', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:27:39.827047', 980190962), (298486374, 298486374, '2026-01-03 19:27:39.827047', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:27:39.827047', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 19:27:39.827075', 980190962, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:27:39.827075'), (298486374, FALSE, '2026-01-03 19:27:39.827075', 298486374, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:27:39.827075');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 19:27:39.827101', 1, '{}', '2026-01-03 19:27:39.827101', 980190962), (298486374, 'MyText', '2026-01-03 19:27:39.827101', 1, '{}', '2026-01-03 19:27:39.827101', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:27:39.827130', 'MyString', '2026-01-03 19:27:39.827130', 980190962), (298486374, 298486374, '2026-01-03 19:27:39.827130', 'MyString', '2026-01-03 19:27:39.827130', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 19:27:39.827156', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 19:27:39.827156', '2026-01-02 14:20:12'), (298486374, '2026-01-03 19:27:39.827156', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 19:27:39.827156', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:27:39.827186', '2026-01-03 19:27:39.827186', 980190962), (298486374, 298486374, '2026-01-03 19:27:39.827186', '2026-01-03 19:27:39.827186', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 19:27:39.827211', 980190962, 980190962, '2026-01-03 19:27:39.827211'), (298486374, '2026-01-03 19:27:39.827211', 298486374, 298486374, '2026-01-03 19:27:39.827211');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 19:27:39.827239', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 19:27:39.827239', 1), (298486374, 'MyText', '2026-01-03 19:27:39.827239', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 19:27:39.827239', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 19:27:39.827271', 'alpha', '2026-01-03 19:27:39.827271'), (298486374, '2026-01-03 19:27:39.827271', 'beta', '2026-01-03 19:27:39.827271');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 19:27:39.827290', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 19:27:39.827290'), (298486374, DEFAULT, DEFAULT, '2026-01-03 19:27:39.827290', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 19:27:39.827290')[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (3.8ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (3.8ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 19:27:39.835205', '2026-01-03 19:27:39.835205', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 19:27:39.835205', '2026-01-03 19:27:39.835205', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:27:39.835280', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:27:39.835280', 980190962), (298486374, 298486374, '2026-01-03 19:27:39.835280', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:27:39.835280', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 19:27:39.835309', 980190962, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:27:39.835309'), (298486374, FALSE, '2026-01-03 19:27:39.835309', 298486374, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:27:39.835309');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 19:27:39.835338', 1, '{}', '2026-01-03 19:27:39.835338', 980190962), (298486374, 'MyText', '2026-01-03 19:27:39.835338', 1, '{}', '2026-01-03 19:27:39.835338', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:27:39.835367', 'MyString', '2026-01-03 19:27:39.835367', 980190962), (298486374, 298486374, '2026-01-03 19:27:39.835367', 'MyString', '2026-01-03 19:27:39.835367', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 19:27:39.835395', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 19:27:39.835395', '2026-01-02 14:20:12'), (298486374, '2026-01-03 19:27:39.835395', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 19:27:39.835395', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:27:39.835424', '2026-01-03 19:27:39.835424', 980190962), (298486374, 298486374, '2026-01-03 19:27:39.835424', '2026-01-03 19:27:39.835424', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 19:27:39.835450', 980190962, 980190962, '2026-01-03 19:27:39.835450'), (298486374, '2026-01-03 19:27:39.835450', 298486374, 298486374, '2026-01-03 19:27:39.835450');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 19:27:39.835476', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 19:27:39.835476', 1), (298486374, 'MyText', '2026-01-03 19:27:39.835476', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 19:27:39.835476', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 19:27:39.835610', 'alpha', '2026-01-03 19:27:39.835610'), (298486374, '2026-01-03 19:27:39.835610', 'beta', '2026-01-03 19:27:39.835610');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 19:27:39.835636', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 19:27:39.835636'), (298486374, DEFAULT, DEFAULT, '2026-01-03 19:27:39.835636', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 19:27:39.835636')[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+[ActionCable] Channel files loaded.
+  [1m[36mActiveRecord::InternalMetadata Load (3.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "schema_sha1"]]
+  [1m[36mActiveRecord::SchemaMigration Load (1.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (2.8ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (15.7ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 19:29:32.710667', '2026-01-03 19:29:32.710667', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 19:29:32.710667', '2026-01-03 19:29:32.710667', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:32.727294', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:29:32.727294', 980190962), (298486374, 298486374, '2026-01-03 19:29:32.727294', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:29:32.727294', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 19:29:32.730285', 980190962, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:29:32.730285'), (298486374, FALSE, '2026-01-03 19:29:32.730285', 298486374, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:29:32.730285');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 19:29:32.734023', 1, '{}', '2026-01-03 19:29:32.734023', 980190962), (298486374, 'MyText', '2026-01-03 19:29:32.734023', 1, '{}', '2026-01-03 19:29:32.734023', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:32.736300', 'MyString', '2026-01-03 19:29:32.736300', 980190962), (298486374, 298486374, '2026-01-03 19:29:32.736300', 'MyString', '2026-01-03 19:29:32.736300', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 19:29:32.740460', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 19:29:32.740460', '2026-01-02 14:20:12'), (298486374, '2026-01-03 19:29:32.740460', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 19:29:32.740460', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:32.744192', '2026-01-03 19:29:32.744192', 980190962), (298486374, 298486374, '2026-01-03 19:29:32.744192', '2026-01-03 19:29:32.744192', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 19:29:32.745878', 980190962, 980190962, '2026-01-03 19:29:32.745878'), (298486374, '2026-01-03 19:29:32.745878', 298486374, 298486374, '2026-01-03 19:29:32.745878');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 19:29:32.752518', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 19:29:32.752518', 1), (298486374, 'MyText', '2026-01-03 19:29:32.752518', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 19:29:32.752518', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 19:29:32.754179', 'alpha', '2026-01-03 19:29:32.754179'), (298486374, '2026-01-03 19:29:32.754179', 'beta', '2026-01-03 19:29:32.754179');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 19:29:32.755051', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 19:29:32.755051'), (298486374, DEFAULT, DEFAULT, '2026-01-03 19:29:32.755051', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 19:29:32.755051')[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (3.3ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (3.1ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 19:29:32.809980', '2026-01-03 19:29:32.809980', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 19:29:32.809980', '2026-01-03 19:29:32.809980', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:32.810065', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:29:32.810065', 980190962), (298486374, 298486374, '2026-01-03 19:29:32.810065', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:29:32.810065', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 19:29:32.810093', 980190962, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:29:32.810093'), (298486374, FALSE, '2026-01-03 19:29:32.810093', 298486374, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:29:32.810093');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 19:29:32.810116', 1, '{}', '2026-01-03 19:29:32.810116', 980190962), (298486374, 'MyText', '2026-01-03 19:29:32.810116', 1, '{}', '2026-01-03 19:29:32.810116', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:32.810143', 'MyString', '2026-01-03 19:29:32.810143', 980190962), (298486374, 298486374, '2026-01-03 19:29:32.810143', 'MyString', '2026-01-03 19:29:32.810143', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 19:29:32.810167', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 19:29:32.810167', '2026-01-02 14:20:12'), (298486374, '2026-01-03 19:29:32.810167', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 19:29:32.810167', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:32.810193', '2026-01-03 19:29:32.810193', 980190962), (298486374, 298486374, '2026-01-03 19:29:32.810193', '2026-01-03 19:29:32.810193', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 19:29:32.810216', 980190962, 980190962, '2026-01-03 19:29:32.810216'), (298486374, '2026-01-03 19:29:32.810216', 298486374, 298486374, '2026-01-03 19:29:32.810216');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 19:29:32.810239', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 19:29:32.810239', 1), (298486374, 'MyText', '2026-01-03 19:29:32.810239', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 19:29:32.810239', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 19:29:32.810269', 'alpha', '2026-01-03 19:29:32.810269'), (298486374, '2026-01-03 19:29:32.810269', 'beta', '2026-01-03 19:29:32.810269');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 19:29:32.810286', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 19:29:32.810286'), (298486374, DEFAULT, DEFAULT, '2026-01-03 19:29:32.810286', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 19:29:32.810286')[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (1.6ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (5.5ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 19:29:32.824585', '2026-01-03 19:29:32.824585', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 19:29:32.824585', '2026-01-03 19:29:32.824585', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:32.824660', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:29:32.824660', 980190962), (298486374, 298486374, '2026-01-03 19:29:32.824660', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:29:32.824660', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 19:29:32.824689', 980190962, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:29:32.824689'), (298486374, FALSE, '2026-01-03 19:29:32.824689', 298486374, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:29:32.824689');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 19:29:32.824713', 1, '{}', '2026-01-03 19:29:32.824713', 980190962), (298486374, 'MyText', '2026-01-03 19:29:32.824713', 1, '{}', '2026-01-03 19:29:32.824713', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:32.824740', 'MyString', '2026-01-03 19:29:32.824740', 980190962), (298486374, 298486374, '2026-01-03 19:29:32.824740', 'MyString', '2026-01-03 19:29:32.824740', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 19:29:32.824765', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 19:29:32.824765', '2026-01-02 14:20:12'), (298486374, '2026-01-03 19:29:32.824765', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 19:29:32.824765', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:32.824792', '2026-01-03 19:29:32.824792', 980190962), (298486374, 298486374, '2026-01-03 19:29:32.824792', '2026-01-03 19:29:32.824792', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 19:29:32.824817', 980190962, 980190962, '2026-01-03 19:29:32.824817'), (298486374, '2026-01-03 19:29:32.824817', 298486374, 298486374, '2026-01-03 19:29:32.824817');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 19:29:32.824843', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 19:29:32.824843', 1), (298486374, 'MyText', '2026-01-03 19:29:32.824843', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 19:29:32.824843', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 19:29:32.824874', 'alpha', '2026-01-03 19:29:32.824874'), (298486374, '2026-01-03 19:29:32.824874', 'beta', '2026-01-03 19:29:32.824874');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 19:29:32.824892', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 19:29:32.824892'), (298486374, DEFAULT, DEFAULT, '2026-01-03 19:29:32.824892', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 19:29:32.824892')[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+[ActionCable] Channel files loaded.
+  [1m[36mActiveRecord::InternalMetadata Load (3.5ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "schema_sha1"]]
+  [1m[36mActiveRecord::SchemaMigration Load (8.7ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mTRANSACTION (1.9ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (2.6ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (14.4ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 19:29:49.711021', '2026-01-03 19:29:49.711021', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 19:29:49.711021', '2026-01-03 19:29:49.711021', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:49.722825', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:29:49.722825', 980190962), (298486374, 298486374, '2026-01-03 19:29:49.722825', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:29:49.722825', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 19:29:49.726292', 980190962, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:29:49.726292'), (298486374, FALSE, '2026-01-03 19:29:49.726292', 298486374, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:29:49.726292');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 19:29:49.728184', 1, '{}', '2026-01-03 19:29:49.728184', 980190962), (298486374, 'MyText', '2026-01-03 19:29:49.728184', 1, '{}', '2026-01-03 19:29:49.728184', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:49.731023', 'MyString', '2026-01-03 19:29:49.731023', 980190962), (298486374, 298486374, '2026-01-03 19:29:49.731023', 'MyString', '2026-01-03 19:29:49.731023', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 19:29:49.736526', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 19:29:49.736526', '2026-01-02 14:20:12'), (298486374, '2026-01-03 19:29:49.736526', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 19:29:49.736526', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:49.738931', '2026-01-03 19:29:49.738931', 980190962), (298486374, 298486374, '2026-01-03 19:29:49.738931', '2026-01-03 19:29:49.738931', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 19:29:49.741417', 980190962, 980190962, '2026-01-03 19:29:49.741417'), (298486374, '2026-01-03 19:29:49.741417', 298486374, 298486374, '2026-01-03 19:29:49.741417');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 19:29:49.745538', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 19:29:49.745538', 1), (298486374, 'MyText', '2026-01-03 19:29:49.745538', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 19:29:49.745538', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 19:29:49.752100', 'alpha', '2026-01-03 19:29:49.752100'), (298486374, '2026-01-03 19:29:49.752100', 'beta', '2026-01-03 19:29:49.752100');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 19:29:49.753296', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 19:29:49.753296'), (298486374, DEFAULT, DEFAULT, '2026-01-03 19:29:49.753296', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 19:29:49.753296')[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (1.6ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (3.0ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 19:29:49.808579', '2026-01-03 19:29:49.808579', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 19:29:49.808579', '2026-01-03 19:29:49.808579', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:49.808685', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:29:49.808685', 980190962), (298486374, 298486374, '2026-01-03 19:29:49.808685', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:29:49.808685', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 19:29:49.808718', 980190962, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:29:49.808718'), (298486374, FALSE, '2026-01-03 19:29:49.808718', 298486374, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:29:49.808718');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 19:29:49.808744', 1, '{}', '2026-01-03 19:29:49.808744', 980190962), (298486374, 'MyText', '2026-01-03 19:29:49.808744', 1, '{}', '2026-01-03 19:29:49.808744', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:49.808774', 'MyString', '2026-01-03 19:29:49.808774', 980190962), (298486374, 298486374, '2026-01-03 19:29:49.808774', 'MyString', '2026-01-03 19:29:49.808774', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 19:29:49.808800', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 19:29:49.808800', '2026-01-02 14:20:12'), (298486374, '2026-01-03 19:29:49.808800', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 19:29:49.808800', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:49.808828', '2026-01-03 19:29:49.808828', 980190962), (298486374, 298486374, '2026-01-03 19:29:49.808828', '2026-01-03 19:29:49.808828', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 19:29:49.808851', 980190962, 980190962, '2026-01-03 19:29:49.808851'), (298486374, '2026-01-03 19:29:49.808851', 298486374, 298486374, '2026-01-03 19:29:49.808851');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 19:29:49.808874', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 19:29:49.808874', 1), (298486374, 'MyText', '2026-01-03 19:29:49.808874', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 19:29:49.808874', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 19:29:49.808907', 'alpha', '2026-01-03 19:29:49.808907'), (298486374, '2026-01-03 19:29:49.808907', 'beta', '2026-01-03 19:29:49.808907');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 19:29:49.808929', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 19:29:49.808929'), (298486374, DEFAULT, DEFAULT, '2026-01-03 19:29:49.808929', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 19:29:49.808929')[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (1.8ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (7.6ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 19:29:49.821814', '2026-01-03 19:29:49.821814', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 19:29:49.821814', '2026-01-03 19:29:49.821814', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:49.821855', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:29:49.821855', 980190962), (298486374, 298486374, '2026-01-03 19:29:49.821855', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:29:49.821855', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 19:29:49.821879', 980190962, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:29:49.821879'), (298486374, FALSE, '2026-01-03 19:29:49.821879', 298486374, '2026-01-02 14:52:28', DEFAULT, DEFAULT, '2026-01-03 19:29:49.821879');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 19:29:49.821900', 1, '{}', '2026-01-03 19:29:49.821900', 980190962), (298486374, 'MyText', '2026-01-03 19:29:49.821900', 1, '{}', '2026-01-03 19:29:49.821900', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:49.821922', 'MyString', '2026-01-03 19:29:49.821922', 980190962), (298486374, 298486374, '2026-01-03 19:29:49.821922', 'MyString', '2026-01-03 19:29:49.821922', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 19:29:49.821944', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 19:29:49.821944', '2026-01-02 14:20:12'), (298486374, '2026-01-03 19:29:49.821944', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 19:29:49.821944', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:29:49.821968', '2026-01-03 19:29:49.821968', 980190962), (298486374, 298486374, '2026-01-03 19:29:49.821968', '2026-01-03 19:29:49.821968', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 19:29:49.821989', 980190962, 980190962, '2026-01-03 19:29:49.821989'), (298486374, '2026-01-03 19:29:49.821989', 298486374, 298486374, '2026-01-03 19:29:49.821989');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 19:29:49.822010', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 19:29:49.822010', 1), (298486374, 'MyText', '2026-01-03 19:29:49.822010', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 19:29:49.822010', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 19:29:49.822034', 'alpha', '2026-01-03 19:29:49.822034'), (298486374, '2026-01-03 19:29:49.822034', 'beta', '2026-01-03 19:29:49.822034');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 19:29:49.822049', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 19:29:49.822049'), (298486374, DEFAULT, DEFAULT, '2026-01-03 19:29:49.822049', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 19:29:49.822049')[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+[ActionCable] Channel files loaded.
+  [1m[36mActiveRecord::InternalMetadata Load (2.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "schema_sha1"]]
+  [1m[36mActiveRecord::SchemaMigration Load (1.0ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mTRANSACTION (1.8ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (3.9ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (26.5ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 19:31:03.754324', '2026-01-03 19:31:03.754324', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 19:31:03.754324', '2026-01-03 19:31:03.754324', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:31:03.764841', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:31:03.764841', 980190962), (298486374, 298486374, '2026-01-03 19:31:03.764841', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:31:03.764841', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 19:31:03.767332', 980190962, '2026-01-02 14:52:28', DEFAULT, 'Test Campfire One', '2026-01-03 19:31:03.767332'), (298486374, FALSE, '2026-01-03 19:31:03.767332', 298486374, '2026-01-02 14:52:28', DEFAULT, 'Test Campfire Two', '2026-01-03 19:31:03.767332');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 19:31:03.769094', 1, '{}', '2026-01-03 19:31:03.769094', 980190962), (298486374, 'MyText', '2026-01-03 19:31:03.769094', 1, '{}', '2026-01-03 19:31:03.769094', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:31:03.771554', 'MyString', '2026-01-03 19:31:03.771554', 980190962), (298486374, 298486374, '2026-01-03 19:31:03.771554', 'MyString', '2026-01-03 19:31:03.771554', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 19:31:03.773755', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 19:31:03.773755', '2026-01-02 14:20:12'), (298486374, '2026-01-03 19:31:03.773755', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 19:31:03.773755', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:31:03.776024', '2026-01-03 19:31:03.776024', 980190962), (298486374, 298486374, '2026-01-03 19:31:03.776024', '2026-01-03 19:31:03.776024', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 19:31:03.777499', 980190962, 980190962, '2026-01-03 19:31:03.777499'), (298486374, '2026-01-03 19:31:03.777499', 298486374, 298486374, '2026-01-03 19:31:03.777499');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 19:31:03.779564', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 19:31:03.779564', 1), (298486374, 'MyText', '2026-01-03 19:31:03.779564', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 19:31:03.779564', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 19:31:03.784641', 'alpha', '2026-01-03 19:31:03.784641'), (298486374, '2026-01-03 19:31:03.784641', 'beta', '2026-01-03 19:31:03.784641');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 19:31:03.786065', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 19:31:03.786065'), (298486374, DEFAULT, DEFAULT, '2026-01-03 19:31:03.786065', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 19:31:03.786065')[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[35m (1.3ms)[0m  [1m[35mALTER TABLE "campfire_participants" ENABLE TRIGGER ALL;ALTER TABLE "chat_messages" ENABLE TRIGGER ALL;ALTER TABLE "chat_reactions" ENABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" ENABLE TRIGGER ALL;ALTER TABLE "mentions" ENABLE TRIGGER ALL;ALTER TABLE "post_tags" ENABLE TRIGGER ALL;ALTER TABLE "campfire_messages" ENABLE TRIGGER ALL;ALTER TABLE "users" ENABLE TRIGGER ALL;ALTER TABLE "invites" ENABLE TRIGGER ALL;ALTER TABLE "posts" ENABLE TRIGGER ALL;ALTER TABLE "tags" ENABLE TRIGGER ALL;ALTER TABLE "schema_migrations" ENABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" ENABLE TRIGGER ALL[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (76.4ms)[0m  [1m[35mdo $$
+  declare r record;
+BEGIN
+FOR r IN (
+  SELECT FORMAT(
+    'UPDATE pg_catalog.pg_constraint SET convalidated=false WHERE conname = ''%1$I'' AND connamespace::regnamespace = ''%2$I''::regnamespace; ALTER TABLE %2$I.%3$I VALIDATE CONSTRAINT %1$I;',
+    constraint_name,
+    table_schema,
+    table_name
+  ) AS constraint_check
+  FROM information_schema.table_constraints WHERE constraint_type = 'FOREIGN KEY'
+)
+  LOOP
+    EXECUTE (r.constraint_check);
+  END LOOP;
+END;
+$$;
+[0m
+  [1m[36mTRANSACTION (0.6ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+---------------------------------------------------------------
+CampfiresControllerTest: test_returns_gone_for_closed_campfires
+---------------------------------------------------------------
+  [1m[36mUser Load (0.6ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Exists? (1.2ms)[0m  [1m[34mSELECT 1 AS one FROM "campfire_rooms" WHERE "campfire_rooms"."name" = $1 LIMIT $2[0m  [["name", "Banshee Tango"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mCampfireRoom Create (1.3ms)[0m  [1m[32mINSERT INTO "campfire_rooms" ("active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "id"[0m  [["active", true], ["created_at", "2026-01-03 19:31:04.014753"], ["created_by_id", 980190962], ["ended_at", nil], ["last_empty_at", nil], ["name", "Banshee Tango"], ["updated_at", "2026-01-03 19:31:04.014753"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mCampfireRoom Update (0.3ms)[0m  [1m[33mUPDATE "campfire_rooms" SET "active" = $1, "updated_at" = $2 WHERE "campfire_rooms"."id" = $3[0m  [["active", false], ["updated_at", "2026-01-03 19:31:04.017001"], ["id", 980190963]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.4ms)[0m  [1m[33mUPDATE "users" SET "magic_link_expires_at" = $1, "magic_link_sent_at" = $2, "magic_link_token" = $3, "updated_at" = $4 WHERE "users"."id" = $5[0m  [["magic_link_expires_at", "2026-01-03 20:01:04.017829"], ["magic_link_sent_at", "2026-01-03 19:31:04.017819"], ["magic_link_token", "[FILTERED]"], ["updated_at", "2026-01-03 19:31:04.021485"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/magic_link/X-OMeBtRkZg-jnDV3PPzb6G2qC3otli7-m3MgfNeWSw" for 127.0.0.1 at 2026-01-03 14:31:04 -0500
+Processing by MagicLinksController#show as HTML
+  Parameters: {"token" => "[FILTERED]"}
+  [1m[36mUser Load (0.5ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" IS NULL LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."magic_link_token" = $1 LIMIT $2[0m  [["magic_link_token", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.4ms)[0m  [1m[33mUPDATE "users" SET "last_signed_in_at" = $1, "updated_at" = $2 WHERE "users"."id" = $3[0m  [["last_signed_in_at", "2026-01-03 19:31:04.067374"], ["updated_at", "2026-01-03 19:31:04.068709"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.3ms)[0m  [1m[33mUPDATE "users" SET "magic_link_expires_at" = $1, "magic_link_sent_at" = $2, "magic_link_token" = $3, "updated_at" = $4 WHERE "users"."id" = $5[0m  [["magic_link_expires_at", nil], ["magic_link_sent_at", nil], ["magic_link_token", "[FILTERED]"], ["updated_at", "2026-01-03 19:31:04.070797"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/
+Completed 302 Found in 15ms (ActiveRecord: 2.9ms (8 queries, 0 cached) | GC: 0.0ms)
+Started GET "/" for 127.0.0.1 at 2026-01-03 14:31:04 -0500
+Processing by PostsController#index as HTML
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  Rendering layout layouts/application.html.erb
+  Rendering posts/index.html.erb within layouts/application
+  [1m[36mPost Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "posts" WHERE "posts"."status" IN ($1, $2) AND (published_at IS NULL OR published_at <= $3) LIMIT $4[0m  [["status", 2], ["status", 1], [nil, "2026-01-03 19:31:04.079731"], ["LIMIT", 1]]
+  [1m[36mPost Load (2.8ms)[0m  [1m[34mSELECT "posts".* FROM "posts" WHERE "posts"."status" IN ($1, $2) AND (published_at IS NULL OR published_at <= $3) ORDER BY "posts"."published_at" DESC, "posts"."created_at" DESC[0m  [["status", 2], ["status", 1], [nil, "2026-01-03 19:31:04.079731"]]
+  [1m[36mTag Exists? (5.3ms)[0m  [1m[34mSELECT 1 AS one FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1 LIMIT $2[0m  [["post_id", 980190962], ["LIMIT", 1]]
+  [1m[36mTag Load (0.3ms)[0m  [1m[34mSELECT "tags".* FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1[0m  [["post_id", 980190962]]
+  [1m[36mTag Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1 LIMIT $2[0m  [["post_id", 298486374], ["LIMIT", 1]]
+  [1m[36mTag Load (0.2ms)[0m  [1m[34mSELECT "tags".* FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1[0m  [["post_id", 298486374]]
+  Rendered posts/index.html.erb within layouts/application (Duration: 20.2ms | GC: 0.0ms)
+  Rendered shared/_flash.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 32.8ms | GC: 0.0ms)
+Completed 200 OK in 44ms (Views: 26.2ms | ActiveRecord: 9.6ms (7 queries, 0 cached) | GC: 0.0ms)
+Started POST "/campfires/980190963/voice_token" for 127.0.0.1 at 2026-01-03 14:31:04 -0500
+Processing by CampfiresController#voice_token as HTML
+  Parameters: {"id" => "980190963"}
+  [1m[36mCACHE User Load (0.0ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Load (0.4ms)[0m  [1m[34mSELECT "campfire_rooms".* FROM "campfire_rooms" WHERE "campfire_rooms"."id" = $1 LIMIT $2[0m  [["id", 980190963], ["LIMIT", 1]]
+Completed 410 Gone in 2ms (Views: 0.1ms | ActiveRecord: 0.4ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+--------------------------------------------------------------------------
+CampfiresControllerTest: test_returns_a_livekit_token_for_active_campfires
+--------------------------------------------------------------------------
+  [1m[36mUser Load (3.6ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "campfire_rooms" WHERE "campfire_rooms"."name" = $1 LIMIT $2[0m  [["name", "Grick Alpha"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mCampfireRoom Create (0.6ms)[0m  [1m[32mINSERT INTO "campfire_rooms" ("active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "id"[0m  [["active", true], ["created_at", "2026-01-03 19:31:04.135118"], ["created_by_id", 980190962], ["ended_at", nil], ["last_empty_at", nil], ["name", "Grick Alpha"], ["updated_at", "2026-01-03 19:31:04.135118"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (2.7ms)[0m  [1m[33mUPDATE "users" SET "magic_link_expires_at" = $1, "magic_link_sent_at" = $2, "magic_link_token" = $3, "updated_at" = $4 WHERE "users"."id" = $5[0m  [["magic_link_expires_at", "2026-01-03 20:01:04.136358"], ["magic_link_sent_at", "2026-01-03 19:31:04.136351"], ["magic_link_token", "[FILTERED]"], ["updated_at", "2026-01-03 19:31:04.137554"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/magic_link/hSOanUDvktTSmJ3G18q8Hgr1lp0XEfjqyPg7fBN-SAI" for 127.0.0.1 at 2026-01-03 14:31:04 -0500
+Processing by MagicLinksController#show as HTML
+  Parameters: {"token" => "[FILTERED]"}
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" IS NULL LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mUser Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."magic_link_token" = $1 LIMIT $2[0m  [["magic_link_token", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.4ms)[0m  [1m[33mUPDATE "users" SET "last_signed_in_at" = $1, "updated_at" = $2 WHERE "users"."id" = $3[0m  [["last_signed_in_at", "2026-01-03 19:31:04.142332"], ["updated_at", "2026-01-03 19:31:04.143685"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.3ms)[0m  [1m[33mUPDATE "users" SET "magic_link_expires_at" = $1, "magic_link_sent_at" = $2, "magic_link_token" = $3, "updated_at" = $4 WHERE "users"."id" = $5[0m  [["magic_link_expires_at", nil], ["magic_link_sent_at", nil], ["magic_link_token", "[FILTERED]"], ["updated_at", "2026-01-03 19:31:04.146000"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/
+Completed 302 Found in 5ms (ActiveRecord: 3.2ms (8 queries, 0 cached) | GC: 0.0ms)
+Started GET "/" for 127.0.0.1 at 2026-01-03 14:31:04 -0500
+Processing by PostsController#index as HTML
+  [1m[36mUser Load (0.6ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  Rendering layout layouts/application.html.erb
+  Rendering posts/index.html.erb within layouts/application
+  [1m[36mPost Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "posts" WHERE "posts"."status" IN ($1, $2) AND (published_at IS NULL OR published_at <= $3) LIMIT $4[0m  [["status", 2], ["status", 1], [nil, "2026-01-03 19:31:04.149624"], ["LIMIT", 1]]
+  [1m[36mPost Load (0.2ms)[0m  [1m[34mSELECT "posts".* FROM "posts" WHERE "posts"."status" IN ($1, $2) AND (published_at IS NULL OR published_at <= $3) ORDER BY "posts"."published_at" DESC, "posts"."created_at" DESC[0m  [["status", 2], ["status", 1], [nil, "2026-01-03 19:31:04.149624"]]
+  [1m[36mTag Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1 LIMIT $2[0m  [["post_id", 980190962], ["LIMIT", 1]]
+  [1m[36mTag Load (0.2ms)[0m  [1m[34mSELECT "tags".* FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1[0m  [["post_id", 980190962]]
+  [1m[36mTag Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1 LIMIT $2[0m  [["post_id", 298486374], ["LIMIT", 1]]
+  [1m[36mTag Load (0.2ms)[0m  [1m[34mSELECT "tags".* FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1[0m  [["post_id", 298486374]]
+  Rendered posts/index.html.erb within layouts/application (Duration: 11.0ms | GC: 0.0ms)
+  Rendered shared/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 11.7ms | GC: 0.0ms)
+Completed 200 OK in 14ms (Views: 10.3ms | ActiveRecord: 2.2ms (7 queries, 0 cached) | GC: 0.0ms)
+Started POST "/campfires/980190964/voice_token" for 127.0.0.1 at 2026-01-03 14:31:04 -0500
+Processing by CampfiresController#voice_token as HTML
+  Parameters: {"id" => "980190964"}
+  [1m[36mCACHE User Load (0.0ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Load (0.2ms)[0m  [1m[34mSELECT "campfire_rooms".* FROM "campfire_rooms" WHERE "campfire_rooms"."id" = $1 LIMIT $2[0m  [["id", 980190964], ["LIMIT", 1]]
+Completed 500 Internal Server Error in 2ms (ActiveRecord: 0.2ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+----------------------------------------------------------------------------
+CampfireLivekitTest: test_builds_a_livekit_token_scoped_to_the_campfire_room
+----------------------------------------------------------------------------
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "campfire_rooms" WHERE "campfire_rooms"."name" = $1 LIMIT $2[0m  [["name", "Banshee Tango"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mCampfireRoom Create (0.4ms)[0m  [1m[32mINSERT INTO "campfire_rooms" ("active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "id"[0m  [["active", true], ["created_at", "2026-01-03 19:31:04.167982"], ["created_by_id", 980190962], ["ended_at", nil], ["last_empty_at", nil], ["name", "Banshee Tango"], ["updated_at", "2026-01-03 19:31:04.167982"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+[ActionCable] Channel files loaded.
+  [1m[36mActiveRecord::InternalMetadata Load (1.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "schema_sha1"]]
+  [1m[36mActiveRecord::SchemaMigration Load (0.8ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mTRANSACTION (1.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (2.2ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (19.6ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 19:31:13.311463', '2026-01-03 19:31:13.311463', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 19:31:13.311463', '2026-01-03 19:31:13.311463', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:31:13.324998', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:31:13.324998', 980190962), (298486374, 298486374, '2026-01-03 19:31:13.324998', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:31:13.324998', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 19:31:13.327170', 980190962, '2026-01-02 14:52:28', DEFAULT, 'Test Campfire One', '2026-01-03 19:31:13.327170'), (298486374, FALSE, '2026-01-03 19:31:13.327170', 298486374, '2026-01-02 14:52:28', DEFAULT, 'Test Campfire Two', '2026-01-03 19:31:13.327170');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 19:31:13.329157', 1, '{}', '2026-01-03 19:31:13.329157', 980190962), (298486374, 'MyText', '2026-01-03 19:31:13.329157', 1, '{}', '2026-01-03 19:31:13.329157', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:31:13.333748', 'MyString', '2026-01-03 19:31:13.333748', 980190962), (298486374, 298486374, '2026-01-03 19:31:13.333748', 'MyString', '2026-01-03 19:31:13.333748', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 19:31:13.336209', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 19:31:13.336209', '2026-01-02 14:20:12'), (298486374, '2026-01-03 19:31:13.336209', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 19:31:13.336209', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:31:13.338732', '2026-01-03 19:31:13.338732', 980190962), (298486374, 298486374, '2026-01-03 19:31:13.338732', '2026-01-03 19:31:13.338732', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 19:31:13.342937', 980190962, 980190962, '2026-01-03 19:31:13.342937'), (298486374, '2026-01-03 19:31:13.342937', 298486374, 298486374, '2026-01-03 19:31:13.342937');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 19:31:13.346120', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 19:31:13.346120', 1), (298486374, 'MyText', '2026-01-03 19:31:13.346120', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 19:31:13.346120', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 19:31:13.350440', 'alpha', '2026-01-03 19:31:13.350440'), (298486374, '2026-01-03 19:31:13.350440', 'beta', '2026-01-03 19:31:13.350440');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 19:31:13.351838', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 19:31:13.351838'), (298486374, DEFAULT, DEFAULT, '2026-01-03 19:31:13.351838', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 19:31:13.351838')[0m
+  [1m[36mTRANSACTION (0.9ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[35m (2.6ms)[0m  [1m[35mALTER TABLE "campfire_participants" ENABLE TRIGGER ALL;ALTER TABLE "chat_messages" ENABLE TRIGGER ALL;ALTER TABLE "chat_reactions" ENABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" ENABLE TRIGGER ALL;ALTER TABLE "mentions" ENABLE TRIGGER ALL;ALTER TABLE "post_tags" ENABLE TRIGGER ALL;ALTER TABLE "campfire_messages" ENABLE TRIGGER ALL;ALTER TABLE "users" ENABLE TRIGGER ALL;ALTER TABLE "invites" ENABLE TRIGGER ALL;ALTER TABLE "posts" ENABLE TRIGGER ALL;ALTER TABLE "tags" ENABLE TRIGGER ALL;ALTER TABLE "schema_migrations" ENABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" ENABLE TRIGGER ALL[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (1.0ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (8.3ms)[0m  [1m[35mdo $$
+  declare r record;
+BEGIN
+FOR r IN (
+  SELECT FORMAT(
+    'UPDATE pg_catalog.pg_constraint SET convalidated=false WHERE conname = ''%1$I'' AND connamespace::regnamespace = ''%2$I''::regnamespace; ALTER TABLE %2$I.%3$I VALIDATE CONSTRAINT %1$I;',
+    constraint_name,
+    table_schema,
+    table_name
+  ) AS constraint_check
+  FROM information_schema.table_constraints WHERE constraint_type = 'FOREIGN KEY'
+)
+  LOOP
+    EXECUTE (r.constraint_check);
+  END LOOP;
+END;
+$$;
+[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+----------------------------------------------------------------------------
+CampfireLivekitTest: test_builds_a_livekit_token_scoped_to_the_campfire_room
+----------------------------------------------------------------------------
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "campfire_rooms" WHERE "campfire_rooms"."name" = $1 LIMIT $2[0m  [["name", "Hippogriff Juliet"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mCampfireRoom Create (1.4ms)[0m  [1m[32mINSERT INTO "campfire_rooms" ("active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "id"[0m  [["active", true], ["created_at", "2026-01-03 19:31:13.432477"], ["created_by_id", 980190962], ["ended_at", nil], ["last_empty_at", nil], ["name", "Hippogriff Juliet"], ["updated_at", "2026-01-03 19:31:13.432477"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (1.1ms)[0m  [1m[35mBEGIN[0m
+---------------------------------------------------------------
+CampfiresControllerTest: test_returns_gone_for_closed_campfires
+---------------------------------------------------------------
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "campfire_rooms" WHERE "campfire_rooms"."name" = $1 LIMIT $2[0m  [["name", "Doppelganger Juliet"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mCampfireRoom Create (0.4ms)[0m  [1m[32mINSERT INTO "campfire_rooms" ("active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "id"[0m  [["active", true], ["created_at", "2026-01-03 19:31:13.478079"], ["created_by_id", 980190962], ["ended_at", nil], ["last_empty_at", nil], ["name", "Doppelganger Juliet"], ["updated_at", "2026-01-03 19:31:13.478079"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mCampfireRoom Update (1.1ms)[0m  [1m[33mUPDATE "campfire_rooms" SET "active" = $1, "updated_at" = $2 WHERE "campfire_rooms"."id" = $3[0m  [["active", false], ["updated_at", "2026-01-03 19:31:13.479158"], ["id", 980190964]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (1.8ms)[0m  [1m[33mUPDATE "users" SET "magic_link_expires_at" = $1, "magic_link_sent_at" = $2, "magic_link_token" = $3, "updated_at" = $4 WHERE "users"."id" = $5[0m  [["magic_link_expires_at", "2026-01-03 20:01:13.480793"], ["magic_link_sent_at", "2026-01-03 19:31:13.480783"], ["magic_link_token", "[FILTERED]"], ["updated_at", "2026-01-03 19:31:13.488289"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/magic_link/G1UO7k_J76GHu_cfyty-NGTrKnHG1OSJAe_RM15N_JM" for 127.0.0.1 at 2026-01-03 14:31:13 -0500
+Processing by MagicLinksController#show as HTML
+  Parameters: {"token" => "[FILTERED]"}
+  [1m[36mUser Load (1.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" IS NULL LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mUser Load (0.5ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."magic_link_token" = $1 LIMIT $2[0m  [["magic_link_token", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.2ms)[0m  [1m[33mUPDATE "users" SET "last_signed_in_at" = $1, "updated_at" = $2 WHERE "users"."id" = $3[0m  [["last_signed_in_at", "2026-01-03 19:31:13.527396"], ["updated_at", "2026-01-03 19:31:13.528502"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.2ms)[0m  [1m[33mUPDATE "users" SET "magic_link_expires_at" = $1, "magic_link_sent_at" = $2, "magic_link_token" = $3, "updated_at" = $4 WHERE "users"."id" = $5[0m  [["magic_link_expires_at", nil], ["magic_link_sent_at", nil], ["magic_link_token", "[FILTERED]"], ["updated_at", "2026-01-03 19:31:13.530411"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/
+Completed 302 Found in 13ms (ActiveRecord: 3.6ms (8 queries, 0 cached) | GC: 0.0ms)
+Started GET "/" for 127.0.0.1 at 2026-01-03 14:31:13 -0500
+Processing by PostsController#index as HTML
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  Rendering layout layouts/application.html.erb
+  Rendering posts/index.html.erb within layouts/application
+  [1m[36mPost Exists? (1.6ms)[0m  [1m[34mSELECT 1 AS one FROM "posts" WHERE "posts"."status" IN ($1, $2) AND (published_at IS NULL OR published_at <= $3) LIMIT $4[0m  [["status", 2], ["status", 1], [nil, "2026-01-03 19:31:13.536622"], ["LIMIT", 1]]
+  [1m[36mPost Load (1.1ms)[0m  [1m[34mSELECT "posts".* FROM "posts" WHERE "posts"."status" IN ($1, $2) AND (published_at IS NULL OR published_at <= $3) ORDER BY "posts"."published_at" DESC, "posts"."created_at" DESC[0m  [["status", 2], ["status", 1], [nil, "2026-01-03 19:31:13.536622"]]
+  [1m[36mTag Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1 LIMIT $2[0m  [["post_id", 980190962], ["LIMIT", 1]]
+  [1m[36mTag Load (0.2ms)[0m  [1m[34mSELECT "tags".* FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1[0m  [["post_id", 980190962]]
+  [1m[36mTag Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1 LIMIT $2[0m  [["post_id", 298486374], ["LIMIT", 1]]
+  [1m[36mTag Load (0.4ms)[0m  [1m[34mSELECT "tags".* FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1[0m  [["post_id", 298486374]]
+  Rendered posts/index.html.erb within layouts/application (Duration: 16.1ms | GC: 0.0ms)
+  Rendered shared/_flash.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 25.0ms | GC: 0.0ms)
+Completed 200 OK in 33ms (Views: 22.9ms | ActiveRecord: 4.6ms (7 queries, 0 cached) | GC: 0.0ms)
+Started POST "/campfires/980190964/voice_token" for 127.0.0.1 at 2026-01-03 14:31:13 -0500
+Processing by CampfiresController#voice_token as HTML
+  Parameters: {"id" => "980190964"}
+  [1m[36mCACHE User Load (0.0ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Load (0.4ms)[0m  [1m[34mSELECT "campfire_rooms".* FROM "campfire_rooms" WHERE "campfire_rooms"."id" = $1 LIMIT $2[0m  [["id", 980190964], ["LIMIT", 1]]
+Completed 410 Gone in 1ms (Views: 0.1ms | ActiveRecord: 0.4ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+--------------------------------------------------------------------------
+CampfiresControllerTest: test_returns_a_livekit_token_for_active_campfires
+--------------------------------------------------------------------------
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "campfire_rooms" WHERE "campfire_rooms"."name" = $1 LIMIT $2[0m  [["name", "Giant Spider November"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mCampfireRoom Create (0.4ms)[0m  [1m[32mINSERT INTO "campfire_rooms" ("active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "id"[0m  [["active", true], ["created_at", "2026-01-03 19:31:13.575044"], ["created_by_id", 980190962], ["ended_at", nil], ["last_empty_at", nil], ["name", "Giant Spider November"], ["updated_at", "2026-01-03 19:31:13.575044"]]
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.3ms)[0m  [1m[33mUPDATE "users" SET "magic_link_expires_at" = $1, "magic_link_sent_at" = $2, "magic_link_token" = $3, "updated_at" = $4 WHERE "users"."id" = $5[0m  [["magic_link_expires_at", "2026-01-03 20:01:13.576426"], ["magic_link_sent_at", "2026-01-03 19:31:13.576418"], ["magic_link_token", "[FILTERED]"], ["updated_at", "2026-01-03 19:31:13.577767"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/magic_link/qR47Ip1NAmhZRy2n7fr70tnssQJEa6UdGlFHO7Yqtbc" for 127.0.0.1 at 2026-01-03 14:31:13 -0500
+Processing by MagicLinksController#show as HTML
+  Parameters: {"token" => "[FILTERED]"}
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" IS NULL LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mUser Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."magic_link_token" = $1 LIMIT $2[0m  [["magic_link_token", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.7ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.2ms)[0m  [1m[33mUPDATE "users" SET "last_signed_in_at" = $1, "updated_at" = $2 WHERE "users"."id" = $3[0m  [["last_signed_in_at", "2026-01-03 19:31:13.580163"], ["updated_at", "2026-01-03 19:31:13.581826"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.3ms)[0m  [1m[33mUPDATE "users" SET "magic_link_expires_at" = $1, "magic_link_sent_at" = $2, "magic_link_token" = $3, "updated_at" = $4 WHERE "users"."id" = $5[0m  [["magic_link_expires_at", nil], ["magic_link_sent_at", nil], ["magic_link_token", "[FILTERED]"], ["updated_at", "2026-01-03 19:31:13.583542"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/
+Completed 302 Found in 5ms (ActiveRecord: 2.4ms (8 queries, 0 cached) | GC: 0.0ms)
+Started GET "/" for 127.0.0.1 at 2026-01-03 14:31:13 -0500
+Processing by PostsController#index as HTML
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  Rendering layout layouts/application.html.erb
+  Rendering posts/index.html.erb within layouts/application
+  [1m[36mPost Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "posts" WHERE "posts"."status" IN ($1, $2) AND (published_at IS NULL OR published_at <= $3) LIMIT $4[0m  [["status", 2], ["status", 1], [nil, "2026-01-03 19:31:13.585906"], ["LIMIT", 1]]
+  [1m[36mPost Load (2.2ms)[0m  [1m[34mSELECT "posts".* FROM "posts" WHERE "posts"."status" IN ($1, $2) AND (published_at IS NULL OR published_at <= $3) ORDER BY "posts"."published_at" DESC, "posts"."created_at" DESC[0m  [["status", 2], ["status", 1], [nil, "2026-01-03 19:31:13.585906"]]
+  [1m[36mTag Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1 LIMIT $2[0m  [["post_id", 980190962], ["LIMIT", 1]]
+  [1m[36mTag Load (0.3ms)[0m  [1m[34mSELECT "tags".* FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1[0m  [["post_id", 980190962]]
+  [1m[36mTag Exists? (5.6ms)[0m  [1m[34mSELECT 1 AS one FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1 LIMIT $2[0m  [["post_id", 298486374], ["LIMIT", 1]]
+  [1m[36mTag Load (0.3ms)[0m  [1m[34mSELECT "tags".* FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1[0m  [["post_id", 298486374]]
+  Rendered posts/index.html.erb within layouts/application (Duration: 26.0ms | GC: 0.0ms)
+  Rendered shared/_flash.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 27.0ms | GC: 0.0ms)
+Completed 200 OK in 28ms (Views: 18.3ms | ActiveRecord: 9.1ms (7 queries, 0 cached) | GC: 0.0ms)
+Started POST "/campfires/980190965/voice_token" for 127.0.0.1 at 2026-01-03 14:31:13 -0500
+Processing by CampfiresController#voice_token as HTML
+  Parameters: {"id" => "980190965"}
+  [1m[36mCACHE User Load (0.0ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Load (0.3ms)[0m  [1m[34mSELECT "campfire_rooms".* FROM "campfire_rooms" WHERE "campfire_rooms"."id" = $1 LIMIT $2[0m  [["id", 980190965], ["LIMIT", 1]]
+Completed 500 Internal Server Error in 2ms (ActiveRecord: 0.3ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[31mROLLBACK[0m
+[ActionCable] Channel files loaded.
+  [1m[36mActiveRecord::InternalMetadata Load (1.7ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "schema_sha1"]]
+  [1m[36mActiveRecord::SchemaMigration Load (0.9ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (2.4ms)[0m  [1m[35mALTER TABLE "campfire_participants" DISABLE TRIGGER ALL;ALTER TABLE "chat_messages" DISABLE TRIGGER ALL;ALTER TABLE "chat_reactions" DISABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" DISABLE TRIGGER ALL;ALTER TABLE "mentions" DISABLE TRIGGER ALL;ALTER TABLE "post_tags" DISABLE TRIGGER ALL;ALTER TABLE "campfire_messages" DISABLE TRIGGER ALL;ALTER TABLE "users" DISABLE TRIGGER ALL;ALTER TABLE "invites" DISABLE TRIGGER ALL;ALTER TABLE "posts" DISABLE TRIGGER ALL;ALTER TABLE "tags" DISABLE TRIGGER ALL;ALTER TABLE "schema_migrations" DISABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" DISABLE TRIGGER ALL[0m
+  [1m[36mFixtures Load (13.5ms)[0m  [1m[31mDELETE FROM "campfire_messages";
+DELETE FROM "campfire_participants";
+DELETE FROM "campfire_rooms";
+DELETE FROM "chat_messages";
+DELETE FROM "chat_reactions";
+DELETE FROM "invites";
+DELETE FROM "mentions";
+DELETE FROM "post_tags";
+DELETE FROM "posts";
+DELETE FROM "tags";
+DELETE FROM "users";
+INSERT INTO "campfire_messages" ("id", "body", "campfire_room_id", "created_at", "updated_at", "user_id") VALUES (980190962, 'MyText', 980190962, '2026-01-03 19:31:42.441274', '2026-01-03 19:31:42.441274', 980190962), (298486374, 'MyText', 298486374, '2026-01-03 19:31:42.441274', '2026-01-03 19:31:42.441274', 298486374);
+INSERT INTO "campfire_participants" ("id", "campfire_room_id", "created_at", "last_seen_at", "peer_id", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:31:42.449465', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:31:42.449465', 980190962), (298486374, 298486374, '2026-01-03 19:31:42.449465', '2026-01-02 21:22:21', 'MyString', '2026-01-03 19:31:42.449465', 298486374);
+INSERT INTO "campfire_rooms" ("id", "active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES (980190962, FALSE, '2026-01-03 19:31:42.452832', 980190962, '2026-01-02 14:52:28', DEFAULT, 'Test Campfire One', '2026-01-03 19:31:42.452832'), (298486374, FALSE, '2026-01-03 19:31:42.452832', 298486374, '2026-01-02 14:52:28', DEFAULT, 'Test Campfire Two', '2026-01-03 19:31:42.452832');
+INSERT INTO "chat_messages" ("id", "body", "created_at", "message_type", "metadata", "updated_at", "user_id") VALUES (980190962, 'MyText', '2026-01-03 19:31:42.454485', 1, '{}', '2026-01-03 19:31:42.454485', 980190962), (298486374, 'MyText', '2026-01-03 19:31:42.454485', 1, '{}', '2026-01-03 19:31:42.454485', 298486374);
+INSERT INTO "chat_reactions" ("id", "chat_message_id", "created_at", "emoji", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:31:42.456563', 'MyString', '2026-01-03 19:31:42.456563', 980190962), (298486374, 298486374, '2026-01-03 19:31:42.456563', 'MyString', '2026-01-03 19:31:42.456563', 298486374);
+INSERT INTO "invites" ("id", "created_at", "email", "expires_at", "invited_by_id", "role", "token", "updated_at", "used_at") VALUES (980190962, '2026-01-03 19:31:42.458605', 'invite-one@example.com', '2026-01-02 14:20:12', 980190962, 1, 'invite-one', '2026-01-03 19:31:42.458605', '2026-01-02 14:20:12'), (298486374, '2026-01-03 19:31:42.458605', 'invite-two@example.com', '2026-01-02 14:20:12', 298486374, 1, 'invite-two', '2026-01-03 19:31:42.458605', '2026-01-02 14:20:12');
+INSERT INTO "mentions" ("id", "chat_message_id", "created_at", "updated_at", "user_id") VALUES (980190962, 980190962, '2026-01-03 19:31:42.460807', '2026-01-03 19:31:42.460807', 980190962), (298486374, 298486374, '2026-01-03 19:31:42.460807', '2026-01-03 19:31:42.460807', 298486374);
+INSERT INTO "post_tags" ("id", "created_at", "post_id", "tag_id", "updated_at") VALUES (980190962, '2026-01-03 19:31:42.462615', 980190962, 980190962, '2026-01-03 19:31:42.462615'), (298486374, '2026-01-03 19:31:42.462615', 298486374, 298486374, '2026-01-03 19:31:42.462615');
+INSERT INTO "posts" ("id", "body_markdown", "created_at", "published_at", "slug", "status", "title", "updated_at", "view_count") VALUES (980190962, 'MyText', '2026-01-03 19:31:42.465262', '2026-01-02 14:20:15', 'post-one', 1, 'MyString', '2026-01-03 19:31:42.465262', 1), (298486374, 'MyText', '2026-01-03 19:31:42.465262', '2026-01-02 14:20:15', 'post-two', 1, 'MyString', '2026-01-03 19:31:42.465262', 1);
+INSERT INTO "tags" ("id", "created_at", "name", "updated_at") VALUES (980190962, '2026-01-03 19:31:42.467103', 'alpha', '2026-01-03 19:31:42.467103'), (298486374, '2026-01-03 19:31:42.467103', 'beta', '2026-01-03 19:31:42.467103');
+INSERT INTO "users" ("id", "chat_color", "chat_sound", "created_at", "email", "handle", "last_signed_in_at", "magic_link_expires_at", "magic_link_sent_at", "magic_link_token", "mic_mode", "role", "status_expires_at", "status_message", "updated_at") VALUES (980190962, DEFAULT, DEFAULT, '2026-01-03 19:31:42.468028', 'one@example.com', 'one', '2026-01-02 14:20:08', NULL, NULL, NULL, 0, 1, DEFAULT, DEFAULT, '2026-01-03 19:31:42.468028'), (298486374, DEFAULT, DEFAULT, '2026-01-03 19:31:42.468028', 'two@example.com', 'two', '2026-01-02 14:20:08', NULL, NULL, NULL, 1, 1, DEFAULT, DEFAULT, '2026-01-03 19:31:42.468028')[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[35m (1.9ms)[0m  [1m[35mALTER TABLE "campfire_participants" ENABLE TRIGGER ALL;ALTER TABLE "chat_messages" ENABLE TRIGGER ALL;ALTER TABLE "chat_reactions" ENABLE TRIGGER ALL;ALTER TABLE "campfire_rooms" ENABLE TRIGGER ALL;ALTER TABLE "mentions" ENABLE TRIGGER ALL;ALTER TABLE "post_tags" ENABLE TRIGGER ALL;ALTER TABLE "campfire_messages" ENABLE TRIGGER ALL;ALTER TABLE "users" ENABLE TRIGGER ALL;ALTER TABLE "invites" ENABLE TRIGGER ALL;ALTER TABLE "posts" ENABLE TRIGGER ALL;ALTER TABLE "tags" ENABLE TRIGGER ALL;ALTER TABLE "schema_migrations" ENABLE TRIGGER ALL;ALTER TABLE "ar_internal_metadata" ENABLE TRIGGER ALL[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (25.9ms)[0m  [1m[35mdo $$
+  declare r record;
+BEGIN
+FOR r IN (
+  SELECT FORMAT(
+    'UPDATE pg_catalog.pg_constraint SET convalidated=false WHERE conname = ''%1$I'' AND connamespace::regnamespace = ''%2$I''::regnamespace; ALTER TABLE %2$I.%3$I VALIDATE CONSTRAINT %1$I;',
+    constraint_name,
+    table_schema,
+    table_name
+  ) AS constraint_check
+  FROM information_schema.table_constraints WHERE constraint_type = 'FOREIGN KEY'
+)
+  LOOP
+    EXECUTE (r.constraint_check);
+  END LOOP;
+END;
+$$;
+[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+--------------------------------------------------------------------------
+CampfiresControllerTest: test_returns_a_livekit_token_for_active_campfires
+--------------------------------------------------------------------------
+  [1m[36mUser Load (0.6ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "campfire_rooms" WHERE "campfire_rooms"."name" = $1 LIMIT $2[0m  [["name", "Mimic Xray"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mCampfireRoom Create (1.1ms)[0m  [1m[32mINSERT INTO "campfire_rooms" ("active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "id"[0m  [["active", true], ["created_at", "2026-01-03 19:31:42.596378"], ["created_by_id", 980190962], ["ended_at", nil], ["last_empty_at", nil], ["name", "Mimic Xray"], ["updated_at", "2026-01-03 19:31:42.596378"]]
+  [1m[36mTRANSACTION (0.9ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.3ms)[0m  [1m[33mUPDATE "users" SET "magic_link_expires_at" = $1, "magic_link_sent_at" = $2, "magic_link_token" = $3, "updated_at" = $4 WHERE "users"."id" = $5[0m  [["magic_link_expires_at", "2026-01-03 20:01:42.599156"], ["magic_link_sent_at", "2026-01-03 19:31:42.599145"], ["magic_link_token", "[FILTERED]"], ["updated_at", "2026-01-03 19:31:42.603504"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/magic_link/JjiuFwknDs0Jia5xAmx0GwKVmoH8IscBZQKfaer9060" for 127.0.0.1 at 2026-01-03 14:31:42 -0500
+Processing by MagicLinksController#show as HTML
+  Parameters: {"token" => "[FILTERED]"}
+  [1m[36mUser Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" IS NULL LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."magic_link_token" = $1 LIMIT $2[0m  [["magic_link_token", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (2.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.3ms)[0m  [1m[33mUPDATE "users" SET "last_signed_in_at" = $1, "updated_at" = $2 WHERE "users"."id" = $3[0m  [["last_signed_in_at", "2026-01-03 19:31:42.639237"], ["updated_at", "2026-01-03 19:31:42.642473"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.5ms)[0m  [1m[33mUPDATE "users" SET "magic_link_expires_at" = $1, "magic_link_sent_at" = $2, "magic_link_token" = $3, "updated_at" = $4 WHERE "users"."id" = $5[0m  [["magic_link_expires_at", nil], ["magic_link_sent_at", nil], ["magic_link_token", "[FILTERED]"], ["updated_at", "2026-01-03 19:31:42.644329"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/
+Completed 302 Found in 15ms (ActiveRecord: 4.7ms (8 queries, 0 cached) | GC: 0.0ms)
+Started GET "/" for 127.0.0.1 at 2026-01-03 14:31:42 -0500
+Processing by PostsController#index as HTML
+  [1m[36mUser Load (0.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  Rendering layout layouts/application.html.erb
+  Rendering posts/index.html.erb within layouts/application
+  [1m[36mPost Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "posts" WHERE "posts"."status" IN ($1, $2) AND (published_at IS NULL OR published_at <= $3) LIMIT $4[0m  [["status", 2], ["status", 1], [nil, "2026-01-03 19:31:42.650750"], ["LIMIT", 1]]
+  [1m[36mPost Load (0.6ms)[0m  [1m[34mSELECT "posts".* FROM "posts" WHERE "posts"."status" IN ($1, $2) AND (published_at IS NULL OR published_at <= $3) ORDER BY "posts"."published_at" DESC, "posts"."created_at" DESC[0m  [["status", 2], ["status", 1], [nil, "2026-01-03 19:31:42.650750"]]
+  [1m[36mTag Exists? (2.6ms)[0m  [1m[34mSELECT 1 AS one FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1 LIMIT $2[0m  [["post_id", 980190962], ["LIMIT", 1]]
+  [1m[36mTag Load (0.5ms)[0m  [1m[34mSELECT "tags".* FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1[0m  [["post_id", 980190962]]
+  [1m[36mTag Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1 LIMIT $2[0m  [["post_id", 298486374], ["LIMIT", 1]]
+  [1m[36mTag Load (0.2ms)[0m  [1m[34mSELECT "tags".* FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1[0m  [["post_id", 298486374]]
+  Rendered posts/index.html.erb within layouts/application (Duration: 14.6ms | GC: 0.0ms)
+  Rendered shared/_flash.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 26.2ms | GC: 0.0ms)
+Completed 200 OK in 35ms (Views: 24.1ms | ActiveRecord: 4.8ms (7 queries, 0 cached) | GC: 0.0ms)
+Started POST "/campfires/980190963/voice_token" for 127.0.0.1 at 2026-01-03 14:31:42 -0500
+Processing by CampfiresController#voice_token as HTML
+  Parameters: {"id" => "980190963"}
+  [1m[36mCACHE User Load (0.0ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Load (0.5ms)[0m  [1m[34mSELECT "campfire_rooms".* FROM "campfire_rooms" WHERE "campfire_rooms"."id" = $1 LIMIT $2[0m  [["id", 980190963], ["LIMIT", 1]]
+Completed 200 OK in 470ms (Views: 0.2ms | ActiveRecord: 0.5ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (1.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+---------------------------------------------------------------
+CampfiresControllerTest: test_returns_gone_for_closed_campfires
+---------------------------------------------------------------
+  [1m[36mUser Load (0.6ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "campfire_rooms" WHERE "campfire_rooms"."name" = $1 LIMIT $2[0m  [["name", "Hippogriff Lima"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mCampfireRoom Create (0.7ms)[0m  [1m[32mINSERT INTO "campfire_rooms" ("active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "id"[0m  [["active", true], ["created_at", "2026-01-03 19:31:43.162414"], ["created_by_id", 980190962], ["ended_at", nil], ["last_empty_at", nil], ["name", "Hippogriff Lima"], ["updated_at", "2026-01-03 19:31:43.162414"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mCampfireRoom Update (0.6ms)[0m  [1m[33mUPDATE "campfire_rooms" SET "active" = $1, "updated_at" = $2 WHERE "campfire_rooms"."id" = $3[0m  [["active", false], ["updated_at", "2026-01-03 19:31:43.163783"], ["id", 980190964]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.9ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (1.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.4ms)[0m  [1m[33mUPDATE "users" SET "magic_link_expires_at" = $1, "magic_link_sent_at" = $2, "magic_link_token" = $3, "updated_at" = $4 WHERE "users"."id" = $5[0m  [["magic_link_expires_at", "2026-01-03 20:01:43.164831"], ["magic_link_sent_at", "2026-01-03 19:31:43.164822"], ["magic_link_token", "[FILTERED]"], ["updated_at", "2026-01-03 19:31:43.167494"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/magic_link/JqkomfQKESod7BjZDRnurBRJ_uS-1vf3fvSMFvaRKbk" for 127.0.0.1 at 2026-01-03 14:31:43 -0500
+Processing by MagicLinksController#show as HTML
+  Parameters: {"token" => "[FILTERED]"}
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" IS NULL LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mUser Load (1.3ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."magic_link_token" = $1 LIMIT $2[0m  [["magic_link_token", "[FILTERED]"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (0.7ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.5ms)[0m  [1m[33mUPDATE "users" SET "last_signed_in_at" = $1, "updated_at" = $2 WHERE "users"."id" = $3[0m  [["last_signed_in_at", "2026-01-03 19:31:43.171659"], ["updated_at", "2026-01-03 19:31:43.173724"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (4.7ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mUser Exists? (7.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "[FILTERED]"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."handle") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["handle", "one"], ["id", 980190962], ["LIMIT", 1]]
+  [1m[36mUser Update (0.3ms)[0m  [1m[33mUPDATE "users" SET "magic_link_expires_at" = $1, "magic_link_sent_at" = $2, "magic_link_token" = $3, "updated_at" = $4 WHERE "users"."id" = $5[0m  [["magic_link_expires_at", nil], ["magic_link_sent_at", nil], ["magic_link_token", "[FILTERED]"], ["updated_at", "2026-01-03 19:31:43.185144"], ["id", 980190962]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/
+Completed 302 Found in 17ms (ActiveRecord: 15.8ms (8 queries, 0 cached) | GC: 0.0ms)
+Started GET "/" for 127.0.0.1 at 2026-01-03 14:31:43 -0500
+Processing by PostsController#index as HTML
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  Rendering layout layouts/application.html.erb
+  Rendering posts/index.html.erb within layouts/application
+  [1m[36mPost Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "posts" WHERE "posts"."status" IN ($1, $2) AND (published_at IS NULL OR published_at <= $3) LIMIT $4[0m  [["status", 2], ["status", 1], [nil, "2026-01-03 19:31:43.187986"], ["LIMIT", 1]]
+  [1m[36mPost Load (0.6ms)[0m  [1m[34mSELECT "posts".* FROM "posts" WHERE "posts"."status" IN ($1, $2) AND (published_at IS NULL OR published_at <= $3) ORDER BY "posts"."published_at" DESC, "posts"."created_at" DESC[0m  [["status", 2], ["status", 1], [nil, "2026-01-03 19:31:43.187986"]]
+  [1m[36mTag Exists? (0.8ms)[0m  [1m[34mSELECT 1 AS one FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1 LIMIT $2[0m  [["post_id", 980190962], ["LIMIT", 1]]
+  [1m[36mTag Load (0.2ms)[0m  [1m[34mSELECT "tags".* FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1[0m  [["post_id", 980190962]]
+  [1m[36mTag Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1 LIMIT $2[0m  [["post_id", 298486374], ["LIMIT", 1]]
+  [1m[36mTag Load (0.7ms)[0m  [1m[34mSELECT "tags".* FROM "tags" INNER JOIN "post_tags" ON "tags"."id" = "post_tags"."tag_id" WHERE "post_tags"."post_id" = $1[0m  [["post_id", 298486374]]
+  Rendered posts/index.html.erb within layouts/application (Duration: 6.8ms | GC: 0.0ms)
+  Rendered shared/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 7.5ms | GC: 0.0ms)
+Completed 200 OK in 9ms (Views: 4.7ms | ActiveRecord: 3.3ms (7 queries, 0 cached) | GC: 0.0ms)
+Started POST "/campfires/980190964/voice_token" for 127.0.0.1 at 2026-01-03 14:31:43 -0500
+Processing by CampfiresController#voice_token as HTML
+  Parameters: {"id" => "980190964"}
+  [1m[36mCACHE User Load (0.0ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Load (0.2ms)[0m  [1m[34mSELECT "campfire_rooms".* FROM "campfire_rooms" WHERE "campfire_rooms"."id" = $1 LIMIT $2[0m  [["id", 980190964], ["LIMIT", 1]]
+Completed 410 Gone in 2ms (Views: 0.0ms | ActiveRecord: 0.2ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+----------------------------------------------------------------------------
+CampfireLivekitTest: test_builds_a_livekit_token_scoped_to_the_campfire_room
+----------------------------------------------------------------------------
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 980190962], ["LIMIT", 1]]
+  [1m[36mCampfireRoom Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "campfire_rooms" WHERE "campfire_rooms"."name" = $1 LIMIT $2[0m  [["name", "Sahuagin Xray"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mCampfireRoom Create (0.5ms)[0m  [1m[32mINSERT INTO "campfire_rooms" ("active", "created_at", "created_by_id", "ended_at", "last_empty_at", "name", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "id"[0m  [["active", true], ["created_at", "2026-01-03 19:31:43.202171"], ["created_by_id", 980190962], ["ended_at", nil], ["last_empty_at", nil], ["name", "Sahuagin Xray"], ["updated_at", "2026-01-03 19:31:43.202171"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m

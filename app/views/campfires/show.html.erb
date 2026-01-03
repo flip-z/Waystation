@@ -1,51 +1,68 @@
-<%= tag.section class: "panel", data: (@room.active? ? { controller: "campfire", campfire_room_id_value: @room.id, campfire_mic_mode_value: current_user.mic_mode } : {}) do %>
+<%= tag.section class: "panel", data: (@room.active? ? { controller: "campfire", campfire_room_id_value: @room.id, campfire_mic_mode_value: (current_user.mic_mode.presence || "push_to_talk"), campfire_voice_token_url_value: voice_token_campfire_path(@room) } : {}) do %>
   <div class="panel-header">
     <h1><%= @room.name %></h1>
     <span class="muted mono">Room <%= @room.id %></span>
   </div>
 
   <% if @room.active? %>
-    <p class="muted" data-campfire-status>Connecting...</p>
-    <div class="campfire-audio-status">
-      <button
-        class="button button-muted button-tiny"
-        data-action="campfire#enableAudio"
-        data-campfire-target="audioButton"
-        hidden
-      >
-        Enable Audio
-      </button>
-      <button
-        class="button button-muted button-tiny"
-        data-action="campfire#playTestTone"
-      >
-        Test Tone
-      </button>
-      <div class="campfire-peer-list" data-campfire-target="peerList"></div>
-    </div>
-    <div class="campfire-debug" data-campfire-target="debug"></div>
-  <% else %>
-    <p class="muted">Campfire closed. Viewing read-only history.</p>
-  <% end %>
-
-  <div class="campfire-controls">
-    <% if @room.active? %>
-      <% if current_user.push_to_talk? %>
+    <div class="campfire-controls">
+      <div class="campfire-voice-actions">
         <button
-          class="button"
+          class="button button-compact button-voice-toggle button-voice-join"
+          data-action="campfire#toggleVoice"
+          data-campfire-target="voiceToggle"
+        >
+          Join Voice
+        </button>
+        <button
+          class="button button-muted button-compact"
+          data-action="campfire#enableAudio"
+          data-campfire-target="audioButton"
+          hidden
+        >
+          Enable Audio
+        </button>
+        <button
+          class="button button-compact"
           data-action="mousedown->campfire#pushToTalkStart mouseup->campfire#pushToTalkEnd mouseleave->campfire#pushToTalkEnd"
+          data-campfire-target="pushToTalkButton"
+          hidden
         >
           Hold to Talk
         </button>
-      <% else %>
-        <span class="muted">Open mic enabled.</span>
-      <% end %>
-    <% end %>
-    <% if @room.created_by_id == current_user.id && @room.active? %>
-      <%= button_to "Close campfire", close_campfire_path(@room), method: :patch, class: "button button-warn" %>
-    <% end %>
-    <%= link_to "Back to chat", chat_path, class: "button button-muted" %>
-  </div>
+      </div>
+      <details class="campfire-room-menu">
+        <summary class="button button-muted button-compact">Room Menu</summary>
+        <div class="campfire-room-menu-panel">
+          <div class="campfire-voice-meta">
+            <label class="muted mono" for="campfire-mic-mode">Mic</label>
+            <select
+              id="campfire-mic-mode"
+              class="select-compact mono"
+              data-campfire-target="micModeSelect"
+              data-action="campfire#changeMicMode"
+            >
+              <option value="push_to_talk">Push to talk</option>
+              <option value="open_mic">Open mic</option>
+            </select>
+            <span class="muted mono" data-campfire-target="voiceModeHint"></span>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="campfire-presence">
+      <div class="campfire-presence-header">
+        <div class="campfire-presence-title">
+          <span class="muted">Connected</span>
+          <span class="muted" data-campfire-target="presenceCount"></span>
+        </div>
+      </div>
+      <ul class="presence-list" data-campfire-target="peerList"></ul>
+    </div>
+  <% else %>
+    <p class="muted">Campfire closed. Viewing read-only history.</p>
+  <% end %>
 
   <%= turbo_stream_from "chat_user_colors" %>
   <%= render "chat_messages/user_colors", users: @chat_users %>
