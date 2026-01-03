@@ -561,6 +561,14 @@ textarea {
   margin-top: 12px;
 }
 
+.campfire-controls-right {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
 .campfire-voice-actions {
   display: flex;
   flex-wrap: wrap;
@@ -573,6 +581,14 @@ textarea {
 }
 
 .campfire-room-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.campfire-help-menu summary {
+  list-style: none;
+}
+
+.campfire-help-menu summary::-webkit-details-marker {
   display: none;
 }
 

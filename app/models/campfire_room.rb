@@ -27,7 +27,15 @@ class CampfireRoom < ApplicationRecord
   end
 
   def self.close_stale!(idle_for: 3.minutes)
-    active.where.not(last_empty_at: nil).where("last_empty_at <= ?", idle_for.ago).find_each(&:end!)
+    cutoff = idle_for.ago
+    active.find_each do |room|
+      stale_participants = room.campfire_participants.where("last_seen_at <= ?", cutoff)
+      stale_participants.delete_all if stale_participants.exists?
+      if room.campfire_participants.count.zero? && room.last_empty_at.nil?
+        room.update!(last_empty_at: Time.current)
+      end
+    end
+    active.where.not(last_empty_at: nil).where("last_empty_at <= ?", cutoff).find_each(&:end!)
   end
 
   def self.generate_name

@@ -33,6 +33,7 @@ export default class extends Controller {
     }
 
     this.subscribePresence()
+    this.startPresencePing()
     this.bindPushToTalkHotkey()
     this.updateVoiceControls()
     this.connectLivekit().catch((error) => {
@@ -43,6 +44,7 @@ export default class extends Controller {
 
   disconnect() {
     if (this.subscription) this.subscription.unsubscribe()
+    this.stopPresencePing()
     this.unbindPushToTalkHotkey()
     this.disconnectLivekit()
     this.audioElements.forEach((audio) => audio.remove())
@@ -81,6 +83,22 @@ export default class extends Controller {
       }
     )
     this.logDebug(`Presence peer id: ${peerId}`)
+  }
+
+  startPresencePing() {
+    this.stopPresencePing()
+    this.presencePingInterval = setInterval(() => {
+      if (this.subscription) {
+        this.subscription.perform("presence_ping")
+      }
+    }, 30000)
+  }
+
+  stopPresencePing() {
+    if (this.presencePingInterval) {
+      clearInterval(this.presencePingInterval)
+      this.presencePingInterval = null
+    }
   }
 
   async connectLivekit() {

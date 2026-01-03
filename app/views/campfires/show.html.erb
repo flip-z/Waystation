@@ -14,41 +14,45 @@
         >
           Join Voice
         </button>
-        <button
-          class="button button-muted button-compact"
-          data-action="campfire#enableAudio"
-          data-campfire-target="audioButton"
-          hidden
-        >
-          Enable Audio
-        </button>
-        <button
-          class="button button-compact"
-          data-action="mousedown->campfire#pushToTalkStart mouseup->campfire#pushToTalkEnd mouseleave->campfire#pushToTalkEnd"
-          data-campfire-target="pushToTalkButton"
-          hidden
-        >
-          Hold to Talk
-        </button>
-      </div>
-      <details class="campfire-room-menu">
-        <summary class="button button-muted button-compact">Room Menu</summary>
-        <div class="campfire-room-menu-panel">
-          <div class="campfire-voice-meta">
-            <label class="muted mono" for="campfire-mic-mode">Mic</label>
-            <select
-              id="campfire-mic-mode"
-              class="select-compact mono"
-              data-campfire-target="micModeSelect"
-              data-action="campfire#changeMicMode"
-            >
-              <option value="push_to_talk">Push to talk</option>
-              <option value="open_mic">Open mic</option>
-            </select>
-            <span class="muted mono" data-campfire-target="voiceModeHint"></span>
+        <details class="campfire-room-menu">
+          <summary class="button button-muted button-compact">Room Menu</summary>
+          <div class="campfire-room-menu-panel">
+            <div class="campfire-voice-meta">
+              <label class="muted mono" for="campfire-mic-mode">Mic</label>
+              <select
+                id="campfire-mic-mode"
+                class="select-compact mono"
+                data-campfire-target="micModeSelect"
+                data-action="campfire#changeMicMode"
+              >
+                <option value="push_to_talk">Push to talk</option>
+                <option value="open_mic">Open mic</option>
+              </select>
+              <span class="muted mono" data-campfire-target="voiceModeHint"></span>
+            </div>
           </div>
-        </div>
-      </details>
+        </details>
+        <details class="campfire-help-menu">
+          <summary class="button button-muted button-compact">Help</summary>
+          <div class="campfire-room-menu-panel">
+            <span class="muted mono">Audio not playing?</span>
+            <button
+              class="button button-muted button-compact"
+              data-action="campfire#enableAudio"
+              data-campfire-target="audioButton"
+              hidden
+            >
+              Enable Audio
+            </button>
+          </div>
+        </details>
+      </div>
+      <div class="campfire-controls-right">
+        <% if @room.created_by_id == current_user.id && @room.active? %>
+          <%= button_to "Close campfire", close_campfire_path(@room), method: :patch, class: "button button-warn button-compact" %>
+        <% end %>
+        <%= link_to "Back to chat", chat_path, class: "button button-muted button-compact" %>
+      </div>
     </div>
 
     <div class="campfire-presence">
@@ -62,6 +66,7 @@
     </div>
   <% else %>
     <p class="muted">Campfire closed. Viewing read-only history.</p>
+    <%= link_to "Back to chat", chat_path, class: "button button-muted button-compact" %>
   <% end %>
 
   <%= turbo_stream_from "chat_user_colors" %>

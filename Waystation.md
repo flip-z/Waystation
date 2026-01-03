@@ -60,6 +60,8 @@ Avoid:
      - LiveKit-powered voice (SFU) with a separate media server; Rails issues LiveKit tokens and handles call membership.
      - LiveKit config via `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`.
      - LiveKit setup guide: https://docs.livekit.io
+     - Campfire UI includes Join/Leave voice and a push-to-talk hotkey (`) when in push-to-talk mode.
+     - Users set a default mic mode in profile; campfires let them switch mic mode per session.
   2. `/beacon`: sets a personal status that posts once to the channel and appears beside the user name.
      - Status expires after 24 hours or on manual clear.
      - Status message persists in chat history.

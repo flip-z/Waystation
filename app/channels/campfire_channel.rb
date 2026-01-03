@@ -71,6 +71,16 @@ class CampfireChannel < ApplicationCable::Channel
     )
   end
 
+  def presence_ping
+    room = CampfireRoom.find_by(id: @room_id)
+    return unless room
+
+    participant = room.campfire_participants.find_by(peer_id: @peer_id)
+    return unless participant
+
+    participant.update!(last_seen_at: Time.current)
+  end
+
   private
 
   def stream_name
