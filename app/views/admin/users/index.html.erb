@@ -1,0 +1,39 @@
+<section class="panel">
+  <div class="panel-header">
+    <h1>User Access</h1>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Handle</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Permissions</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @users.each do |user| %>
+        <tr>
+          <td>@<%= user.handle %></td>
+          <td><%= user.email %></td>
+          <td><%= user.role %></td>
+          <td>
+            <%= form_with model: [:admin, user], method: :patch, local: true, class: "form-inline" do |f| %>
+              <label class="form-inline">
+                <%= f.check_box :files_read %>
+                Global Read
+              </label>
+              <label class="form-inline">
+                <%= f.check_box :files_upload %>
+                Global Upload
+              </label>
+              <%= f.submit "Update", class: "button button-tiny" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</section>

@@ -22,6 +22,7 @@ class User < ApplicationRecord
   has_many :chat_reactions, dependent: :destroy
   has_many :mentions, dependent: :destroy
   has_many :campfire_rooms, foreign_key: :created_by_id, dependent: :nullify
+  has_many :file_entries, foreign_key: :uploaded_by_id, dependent: :nullify
 
   validates :email, presence: true, uniqueness: { case_sensitive: false }
   validates :handle, presence: true, uniqueness: { case_sensitive: false }
@@ -59,6 +60,14 @@ class User < ApplicationRecord
 
   def active_status?
     status_message.present? && status_expires_at&.future?
+  end
+
+  def can_read_files?
+    admin? || files_read?
+  end
+
+  def can_upload_files?
+    admin? || files_upload?
   end
 
   private

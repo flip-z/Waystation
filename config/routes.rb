@@ -31,10 +31,14 @@ Rails.application.routes.draw do
     resources :campfire_messages, only: :create
   end
   resource :profile, only: %i[ edit update ]
-  get "files", to: "shell#files"
+  get "files", to: "files#index", as: :files
+  get "files/folders/:id", to: "files#index", as: :file_folder
+  resources :file_entries, path: "files", only: %i[ show create destroy ]
+  resources :file_folders, path: "files/folders", only: %i[ create destroy ]
 
   namespace :admin do
     resources :invites, only: %i[ index new create ]
     resources :posts
+    resources :users, only: %i[ index update ]
   end
 end

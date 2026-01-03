@@ -25,7 +25,7 @@
 - Expose post history with date selection (read-only) and display older versions.
 - Add tags, drafts, scheduled publishing, and basic view counts.
 ### Checkpoint
-- Review post authoring flow and version history behavior before chat work.
+- Review post authoring flow and version history behavior before file sharing work.
 
 ## Phase 3: Chat (Text + Slash Commands)
 - Implement single-channel real-time text chat with permanent retention.
@@ -44,13 +44,29 @@
 
 ## Phase 4: File Share + Scanning
 - Build folder-based file share with RBAC (Global Read, Global Upload, Admin).
+- Allow Admins to manage folders and delete files.
 - Enforce 2 MB file size limit and configurable file type allowlist.
 - Integrate malware scanning (prefer easy library, ClamAV if viable).
 - Quarantine flagged files and notify Admin.
+- Hard-delete files on removal (no trash) in MVP.
 ### Checkpoint
-- Test upload flow, scanning, and RBAC before deployment work.
+- Test upload flow, scanning, and RBAC before design work.
 
-## Phase 5: Deployment and Ops
+## Phase 5: Adventure Game Tab (Design)
+- Define the adventure game tab scope, visual style, and UX flow.
+- Produce wireframes and a light interaction spec for scenes, choices, and state.
+- Identify data model requirements (progress, inventory, flags) without implementation.
+### Checkpoint
+- Review adventure tab design artifacts before security monitoring work.
+
+## Phase 6: Security/IT Event Monitoring (Design)
+- Define the monitoring scope (auth events, file actions, system alerts).
+- Draft dashboard views, filters, and alerting behavior.
+- Specify event schema and retention targets without implementation.
+### Checkpoint
+- Confirm monitoring design and event model before deployment work.
+
+## Phase 7: Deployment and Ops
 - Self-hosted local deployment for testing.
 - Production deployment to DigitalOcean with IaC where feasible.
 - Add deployment smoke tests and rollback procedure.
@@ -63,4 +79,6 @@
 - Phase 2: Blog authoring, Git history browsing, view counts.
 - Phase 3: Real-time chat, slash commands, voice integration.
 - Phase 4: File share, scanning pipeline, quarantine workflow.
-- Phase 5: DigitalOcean deploy, deployment tests, ops docs.
+- Phase 5: Adventure game tab design, wireframes, interaction spec.
+- Phase 6: Security/IT monitoring design, event schema, dashboard spec.
+- Phase 7: DigitalOcean deploy, deployment tests, ops docs.

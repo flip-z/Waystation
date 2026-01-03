@@ -1,0 +1,165 @@
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <h1>Files</h1>
+      <p class="muted">
+        Path:
+        <% if @folder %>
+          <%= link_to "All files", files_path %>
+          /
+          <%= @folder.breadcrumb_names.join(" / ") %>
+        <% else %>
+          All files
+        <% end %>
+      </p>
+    </div>
+  </div>
+
+  <% if @file_entry.errors.any? %>
+    <div class="flash flash-alert">
+      <%= @file_entry.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <% if current_user.admin? && @alerts.any? %>
+    <div class="panel subpanel">
+      <div class="panel-header">
+        <h2>Admin Alerts</h2>
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Status</th>
+            <th>Reason</th>
+            <th>Uploaded by</th>
+            <th>Updated</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @alerts.each do |alert| %>
+            <tr>
+              <td><%= alert.file&.filename || "(missing file)" %></td>
+              <td><%= alert.status_label %></td>
+              <td><%= alert.quarantine_reason.presence || "-" %></td>
+              <td><%= alert.uploaded_by.handle %></td>
+              <td><%= l(alert.updated_at, format: :short) %></td>
+              <td>
+                <%= button_to "Delete", file_entry_path(alert),
+                              method: :delete,
+                              data: { turbo_confirm: "Delete this file?" },
+                              class: "button button-warn button-tiny" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+
+  <div class="panel subpanel">
+    <div class="panel-header">
+      <h2>Folders</h2>
+      <% if current_user.admin? %>
+        <%= form_with model: @folder_form, url: file_folders_path, local: true, class: "form-inline" do |f| %>
+          <%= f.hidden_field :parent_id %>
+          <%= f.text_field :name, placeholder: "New folder name", class: "input" %>
+          <%= f.submit "Create folder", class: "button button-tiny" %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <% if @folders.any? %>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Folder</th>
+            <th class="numeric">Items</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @folders.each do |folder| %>
+            <tr>
+              <td><%= link_to folder.name, file_folder_path(folder) %></td>
+              <td class="numeric"><%= folder.children.count + folder.file_entries.count %></td>
+              <td>
+                <% if current_user.admin? %>
+                  <%= button_to "Delete", file_folder_path(folder),
+                                method: :delete,
+                                data: { turbo_confirm: "Delete this folder?" },
+                                class: "button button-warn button-tiny" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="muted">No folders yet.</p>
+    <% end %>
+  </div>
+
+  <div class="panel subpanel">
+    <div class="panel-header">
+      <h2>Files</h2>
+      <% if current_user.can_upload_files? %>
+        <%= form_with model: @file_entry, url: file_entries_path, local: true, class: "form-inline", multipart: true do |f| %>
+          <%= f.hidden_field :folder_id, value: @folder&.id %>
+          <%= f.file_field :file, required: true, class: "input" %>
+          <%= f.submit "Upload", class: "button button-tiny" %>
+        <% end %>
+      <% else %>
+        <p class="muted">Upload permission required.</p>
+      <% end %>
+    </div>
+
+    <% if @files.any? %>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <% if @folder.nil? %>
+              <th>Folder</th>
+            <% end %>
+            <th>Type</th>
+            <th class="numeric">Size</th>
+            <th>Uploaded by</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @files.each do |file_entry| %>
+            <tr>
+              <td><%= file_entry.file&.filename || "(missing file)" %></td>
+              <% if @folder.nil? %>
+                <td><%= file_entry.folder&.name || "-" %></td>
+              <% end %>
+              <td><%= file_entry.file&.blob&.content_type || "-" %></td>
+              <td class="numeric"><%= number_to_human_size(file_entry.file&.blob&.byte_size.to_i) %></td>
+              <td><%= file_entry.uploaded_by.handle %></td>
+              <td><%= file_entry.status_label %></td>
+              <td class="actions">
+                <% if file_entry.downloadable? %>
+                  <%= link_to "Download", file_entry_path(file_entry), class: "button button-tiny" %>
+                <% else %>
+                  <span class="muted">Unavailable</span>
+                <% end %>
+                <% if current_user.admin? %>
+                  <%= button_to "Delete", file_entry_path(file_entry),
+                                method: :delete,
+                                data: { turbo_confirm: "Delete this file?" },
+                                class: "button button-warn button-tiny" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="muted">No files uploaded yet.</p>
+    <% end %>
+  </div>
+</section>

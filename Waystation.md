@@ -33,7 +33,7 @@ Avoid:
 
 ---
 
-# Phase One: Blog
+# Phase Two: Blog
 ## Requirements
 - Content format: Markdown only.
 - Features: Create, edit, delete posts; drafts; scheduled publish; tags.
@@ -47,7 +47,7 @@ Avoid:
 
 ---
 
-# Phase Two: Text and Voice Chat
+# Phase Three: Text and Voice Chat
 ## Requirements
 - Single-channel text chat.
 - Persistent history (permanent retention; Admin can purge).
@@ -72,7 +72,7 @@ Avoid:
 
 ---
 
-# Phase Three: File Share w/ Content Scanning
+# Phase Four: File Share w/ Content Scanning
 ## Requirements
 - Simple file repository with folders.
 - Roles:
@@ -88,3 +88,19 @@ Avoid:
 - Per-folder permissions.
 - File versioning.
 - Quotas.
+
+---
+
+# Phase Five: Adventure Game Tab (Design)
+## Requirements
+- Define the adventure game tab scope, visual style, and UX flow.
+- Produce wireframes and a light interaction spec for scenes, choices, and state.
+- Identify data model requirements (progress, inventory, flags) without implementation.
+
+---
+
+# Phase Six: Security/IT Event Monitoring (Design)
+## Requirements
+- Define the monitoring scope (auth events, file actions, system alerts).
+- Draft dashboard views, filters, and alerting behavior.
+- Specify event schema and retention targets without implementation.
